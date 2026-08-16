@@ -115,28 +115,27 @@ This is not a browsing task — no UI to navigate, just data to fetch and read. 
 
 This is what "an AI agent that actually opens the link and uses the product" means in practice. It does **not** need full desktop computer-use — a browser-scoped agent loop is lighter, cheaper, and sufficient. This is also the slowest, most expensive, and least accurate of the three evaluators, so the design below exists specifically to keep its cost and error rate under control.
 
-**Orchestration layer: Stagehand.** Rather than hand-rolling the screenshot → decide → act loop, use [Stagehand](https://github.com/browserbase/stagehand) — an open-source, MIT-licensed, TypeScript-native wrapper over Playwright (fits the existing Next.js/NestJS stack directly, no new language). It exposes three primitives:
-- `page.act("instruction")` — AI decides and performs a click/type/scroll action
-- `page.extract({ instruction, schema })` — AI reads the page and returns structured data
-- `page.observe()` — lists what's actionable on the current page
+**Orchestration layer: Raw Playwright + Gemini Flash.** The agent is built directly on [Playwright](https://playwright.dev/) (headless Chromium) with Gemini Flash as the AI backbone. No wrapper libraries — this gives full control, zero vendor lock-in, and the cheapest possible path. The agent uses the **accessibility tree** (`page.accessibility.snapshot()`) rather than screenshots for AI decision-making, which is both cheaper (text vs. images) and more reliable.
 
-Stagehand is an orchestration/tooling layer, not an accuracy improvement — it still calls an underlying model (Gemini Flash) for every AI-driven decision, so its real value is less hand-written retry/selector code, not better judgment.
-
-**Hybrid design — rule-based first, AI only as fallback.** The organizer-submitted checklist is structured into typed steps, not free text:
+**Hybrid design — rule-based first, AI only as fallback.** The team-submitted checklist is structured into typed steps, not free text:
 
 ```typescript
 type ChecklistStep =
+  | { type: "navigate"; url: string; description: string }
   | { type: "login"; email: string; password: string }
   | { type: "click"; targetHint: string }
-  | { type: "verify"; description: string };
+  | { type: "type"; targetHint: string; value: string }
+  | { type: "verify"; description: string }
+  | { type: "screenshot"; label: string };
 ```
 
-For `login` and `click` steps, try deterministic Playwright locators first (`getByLabel`, `getByRole`, `getByText`) — most hackathon prototypes use standard form/button patterns, so this resolves a large share of steps with **zero AI calls**. Only on a timeout/failure does the step fall through to `page.act(...)`. `verify` steps always require AI judgment (`page.extract(...)`), since they're inherently a visual/functional judgment call.
+For `login`, `click`, and `type` steps, try deterministic Playwright locators first (`getByLabel`, `getByRole`, `getByText`) — most hackathon prototypes use standard form/button patterns, so this resolves 60–70% of steps with **zero AI calls**. Only on a timeout/failure does the step fall through to an AI fallback: the accessibility tree is sent to Gemini Flash, which returns a suggested selector and action. `verify` steps always require AI judgment (screenshot + description sent to Gemini vision), since they're inherently a visual/functional judgment call.
 
 **Guardrails (required, not optional):**
 - Hard step budget per team (e.g. max 8 turns) and a per-team AI-cost cap, enforced in the event config — an organizer-wide AI budget cap sits above this.
 - Every `verify` result must include a **confidence score**, not just pass/fail. Low-confidence results are routed to mandatory human review instead of being auto-scored.
 - The end-to-end scratchpad (steps taken + key screenshots + reasoning) is stored and shown to the judge as evidence, never presented as a final verdict.
+- Sandbox enforcement: browser navigation is restricted to the submitted domain only.
 
 ### 3.4 Score Aggregation
 
@@ -235,7 +234,7 @@ Core tables (Postgres + Prisma). Not exhaustive on columns, but this is the rela
 | Database | PostgreSQL (Supabase or Railway) + Prisma ORM | Consistent with TruXero stack you already know |
 | Vector search | pgvector extension | Plagiarism / submission-similarity detection |
 | AI evaluation (PPT, repo) | Gemini 2.5 Flash (free tier), single-shot structured-output calls | Zero/low cost, sufficient for one-shot scoring tasks; Claude as an optional paid upgrade path |
-| Agentic browser (live demo) | Stagehand (TypeScript, open-source Playwright wrapper) + Gemini Flash, hybrid rule-based-first with AI fallback | Cheapest reliable path to functional demo evaluation; rule-based-first keeps AI calls (and cost) low |
+| Agentic browser (live demo) | Raw Playwright (headless Chromium) + Gemini Flash, hybrid rule-based-first with AI fallback via accessibility tree | Zero vendor lock-in, full control, cheapest path; rule-based-first keeps AI calls (and cost) low |
 | Local/offline AI fallback | Ollama (moondream / quantized Qwen2-VL) | Free compute-only option for dev/testing and overnight batch overflow if free-tier quota is hit |
 | Repo analysis | GitHub REST API + basic static analysis tooling | Commit authenticity + code-quality signal |
 | Auth | NextAuth or Clerk, magic-link for judges | Multi-role, passwordless judge access |
