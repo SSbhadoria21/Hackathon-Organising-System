@@ -1,18 +1,32 @@
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 
-export const generateAccessToken = (userId: Types.ObjectId | string) => {
+// Access token - 15 min k liye 
+export const generateAccessToken = (
+  userId: Types.ObjectId | string,
+  role: 'USER' | 'SUPER_ADMIN' = 'USER'
+) => {
   return jwt.sign(
-    { _id: userId.toString() },
-    process.env.ACCESS_TOKEN_SECRET || 'fallback_access_secret',
-    { expiresIn: (process.env.ACCESS_TOKEN_EXPIRY || '1d') as any }
+    { _id: userId.toString(), role },
+    process.env.ACCESS_TOKEN_SECRET!,
+    { expiresIn: (process.env.ACCESS_TOKEN_EXPIRY || '15m') as any }
   );
 };
 
+// Refresh token 7 din k liye 
 export const generateRefreshToken = (userId: Types.ObjectId | string) => {
   return jwt.sign(
     { _id: userId.toString() },
-    process.env.REFRESH_TOKEN_SECRET || 'fallback_refresh_secret',
-    { expiresIn: (process.env.REFRESH_TOKEN_EXPIRY || '10d') as any }
+    process.env.REFRESH_TOKEN_SECRET!,
+    { expiresIn: (process.env.REFRESH_TOKEN_EXPIRY || '7d') as any }
+  );
+};
+
+
+export const generateJudgeToken = (judgeId: string, hackathonId: string) => {
+  return jwt.sign(
+    { judgeId, hackathonId },
+    process.env.JUDGE_TOKEN_SECRET!,
+    { expiresIn: '7d' }
   );
 };

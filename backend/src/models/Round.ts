@@ -1,49 +1,75 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface ICriterion {
-  _id: Types.ObjectId; 
+  _id: Types.ObjectId;
   name: string;
-  weight: number; 
+  weight: number;     
   description: string;
 }
 
 export interface IRound extends Document {
-  hackathonId: Types.ObjectId; 
+  hackathonId: Types.ObjectId;
   roundName: string;
   roundNumber: number;
-  teams: Types.ObjectId[];
   roundType: 'SUBMISSION' | 'QUIZ' | 'PROTOTYPE' | 'PITCH';
+
+  teamIds: Types.ObjectId[];
+
   roundOpens: Date;
   roundCloses: Date;
-  roundLimit: number;
-  aiWeightage: number;
-  scoreThreshold?: number;
+
+  maxTeamsAdvancing: number;
+
+  aiWeightage: number;      
+  scoreThreshold?: number;  
+
   criterias: ICriterion[];
+
+  quizQuestions?: {
+    question: string;
+    options: string[];
+    correctIndex: number;
+    marks: number;
+    timeLimitSeconds?: number;
+  }[];
+
   createdAt: Date;
   updatedAt: Date;
 }
 
-const RoundSchema: Schema = new Schema(
+const RoundSchema: Schema<IRound> = new Schema(
   {
-    hackathonId: { type: Schema.Types.ObjectId, ref: 'Hackathon', required: true },
-    roundName: { type: String, required: true },
-    roundNumber: { type: Number, required: true },
-    teams: [{ type: Schema.Types.ObjectId, ref: 'Team' }],
-    roundType: { type: String, enum: ['SUBMISSION', 'QUIZ', 'PROTOTYPE', 'PITCH'], required: true },
-    roundOpens: { type: Date, required: true },
-    roundCloses: { type: Date, required: true },
-    roundLimit: { type: Number, required: true },
-    aiWeightage: { type: Number, required: true },
-    scoreThreshold: { type: Number }, 
+    hackathonId:  { type: Schema.Types.ObjectId, ref: 'Hackathon', required: true },
+    roundName:    { type: String, required: true },
+    roundNumber:  { type: Number, required: true, min: 1 },
+    roundType:    { type: String, enum: ['SUBMISSION', 'QUIZ', 'PROTOTYPE', 'PITCH'], required: true },
+    teamIds:      [{ type: Schema.Types.ObjectId, ref: 'Team' }],
+    roundOpens:   { type: Date, required: true },
+    roundCloses:  { type: Date, required: true },
+    maxTeamsAdvancing: { type: Number, required: true, min: 1 },
+    aiWeightage:  { type: Number, required: true, min: 0, max: 1 },
+    scoreThreshold: { type: Number, min: 0, max: 100 },
     criterias: [
       {
-        name: { type: String, required: true },
-        weight: { type: Number, required: true },
-        description: {type:String,required:true},
+        name:        { type: String, required: true },
+        weight:      { type: Number, required: true, min: 0, max: 100 },
+        description: { type: String, required: true },
+      },
+    ],
+    quizQuestions: [
+      {
+        question:        { type: String, required: true },
+        options:         [{ type: String }],
+        correctIndex:    { type: Number, required: true },
+        marks:           { type: Number, required: true },
+        timeLimitSeconds:{ type: Number },
       },
     ],
   },
   { timestamps: true }
 );
 
-export const Round: Model<IRound> = mongoose.models.Round || mongoose.model<IRound>('Round', RoundSchema);
+RoundSchema.index({ hackathonId: 1, roundNumber: 1 });
+
+export const Round: Model<IRound> =
+  mongoose.models.Round || mongoose.model<IRound>('Round', RoundSchema);
