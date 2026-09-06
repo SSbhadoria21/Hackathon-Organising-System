@@ -2,23 +2,40 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import {createBrowserRouter, RouterProvider} from 'react-router-dom'
-import Landing from './pages/Landing/Landing.jsx'
-import Home from './pages/Home/Home.jsx'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import {
+  LandingLayout,
+  Landing,
+  Home,
+  AppLayout
+} from './pages/pagesIndex.js'
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App/>,
+    element: <App />,
     children: [
       {
-        path: "/",
-        element: <Landing/>
-        //TODO: add applayout and landinglayout and use them
+        element: <LandingLayout/>,
+        children:[
+          {
+            path: "/",
+            element: <Landing/>
+          },
+          {
+            path: "/signup",
+            element: <Landing/>
+          }
+        ]
       },
       {
-        path: "/home",
-        element: <Home/>
+        element: <AppLayout />,
+        children:[
+          {
+            path: "/home",
+            element: <Home/>
+          }
+        ]
       }
     ]
   }
@@ -26,6 +43,6 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={rotuer}/>
+    <RouterProvider router={router} />
   </StrictMode>,
 )
