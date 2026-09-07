@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Alef&family=Antonio:wght@400;700&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme{
+    --font-alef: 'Alef', sans-serif;
+    --font-antonio: 'Antonio', sans-serif;
+    --font-pop: 'Poppins', sans-serif;
+    --font-space: 'Space Grotesk', sans-serif;
+
+    --color-darker-blue: #292f4d;
+    --color-navbar-bg: #c1c7e1;
+    --color-dark-blue: #232f72;
+    --color-dark-green: #466211;
+    --color-light-green: #e5ebd8;
+    --color-landing-bg: #ffffff;
+    --color-default-bg: #f4f4f4;
+    --color-bright-gray: #fafafa
+}
+
