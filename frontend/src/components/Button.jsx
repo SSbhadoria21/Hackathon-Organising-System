@@ -4,6 +4,7 @@ const Button = ({
     type='',
     text = "",
     className = '',
+    textsize = 'text-[12px]',
     bg = 'bg-dark-blue',
     rounded = 'rounded-md',
     py = 'py-0.4',
@@ -15,7 +16,7 @@ const Button = ({
         <button type={type} className={`
             ${py}
             ${px}
-            text-[12px]
+            ${textsize}
             hover:shadow-sm hover:shadow-blue-950
             font-alef
             ${bg}

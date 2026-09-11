@@ -7,8 +7,8 @@ import { NavLink } from "react-router-dom"
 const LandingNavbar = () => {
   return (
     <>
-      <div className='flex justify-between'>
-        <div className='flex justify-around w-323 h-10 rounded-b-full bg-navbar-bg navbar'>
+      <div className='flex justify-between gap-2'>
+        <div className='flex justify-around w-7xl h-10 rounded-b-full bg-navbar-bg navbar'>
           <Button text='Signup/Login' className='mt-2.5'/>
           <NavLink
             to="/about"
@@ -41,7 +41,7 @@ const LandingNavbar = () => {
             <span className="absolute left-0 bottom-0 h-0.5 w-full bg-dark-blue scale-x-0 origin-left transition-transform duration-200 group-hover:scale-x-100" />
           </NavLink>
         </div>
-        <div className='w-32 mt-2 mr-3 logo'>
+        <div className='w-32 mt-0 mr-1 logo bg-white/50 backdrop-blur-md rounded-full p-2'>
           <img src={logo} alt="brevitas" />
         </div>
       </div>
