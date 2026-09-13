@@ -1,4 +1,5 @@
 import React from 'react'
+import { useRef } from 'react'
 import './Landing.css'
 import laptopLanding from '../../assets/laptopLanding.png'
 import dash1Landing from '../../assets/dash1Landing.png'
@@ -13,18 +14,6 @@ import organiser from '../../assets/organiserLanding.png'
 
 const Landing = () => {
 
-  const sectionRef = useRef(null);
-
-  // Tracks scroll progress through the whole page (or a specific section)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"], // adjust based on your section boundaries
-  });
-
-  // Move image from its initial position to near "AI Assisted Judging"
-  const x = useTransform(scrollYProgress, [0, 1], [0, -800]);   // adjust -800 to actual distance
-  const y = useTransform(scrollYProgress, [0, 1], [0, 600]);    // adjust to match vertical gap
-  const scaleX = useTransform(scrollYProgress, [0, 1], [1, -1]); // flips image only
 
   return (
     <>
@@ -177,34 +166,17 @@ const Landing = () => {
 
 
 
-        {/* 
-        ye wala mene kia tha:
+        
 
         <div className='absolute top-22 right-19 movingImg'>
           <div className='relative'>
             <img src={organiser} alt="to an oraganiser" className='w-60' />
             <div className='absolute top-70 left-4 font-antonio font-bold text-2xl italic bg-[#b7c4ff] text-[#ffe5a1] rounded-full w-fit px-4 py-1'>to an Organiser</div>
           </div>
-        </div> */}
-
-          <div ref={sectionRef} className="relative">
-      <motion.div
-        style={{ x, y }}
-        className="absolute top-22 right-19 movingImg"
-      >
-        <div className="relative">
-          <motion.img
-            src={organiser}
-            alt="to an organiser"
-            className="w-60"
-            style={{ scaleX }} // flips only the image
-          />
-          <div className="absolute top-70 left-4 font-antonio font-bold text-2xl italic bg-[#b7c4ff] text-[#ffe5a1] rounded-full w-fit px-4 py-1">
-            to an Organiser
-          </div>
         </div>
-      </motion.div>
-    </div>
+
+
+        <div>what</div>
 
       </div>
     </>
