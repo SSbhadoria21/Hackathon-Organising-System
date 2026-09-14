@@ -11,9 +11,22 @@ import thirdLanding from '../../assets/thirdLanding.jpg'
 import fourLanding from '../../assets/fourLanding.jpg'
 import participant from '../../assets/participantLanding.png'
 import organiser from '../../assets/organiserLanding.png'
+import { easeInOut, motion, useInView } from "motion/react"
+
 
 const Landing = () => {
+  const aiJudgeRef = useRef()
+  const aiJudgeInView = useInView(aiJudgeRef, {
+    amount: 0.5
+  })
 
+  const example = {
+    width: 40,
+    backgroundColor: "var(--color-dark-blue)",
+    borderRadius: 5,
+    marginLeft: 150,
+    color: 'white'
+  }
 
   return (
     <>
@@ -96,7 +109,7 @@ const Landing = () => {
 
 
 
-        <div className='flex justify-end mt-45 mr-10 items-center h-auto w-auto aiJudge'>
+        <div ref={aiJudgeRef} className='flex justify-end mt-45 mr-10 items-center h-auto w-auto aiJudge'>
 
           <div className='mr-6 flex flex-col items-center'>
             <div className='bg-light-green/70 text-dark-green px-5 py-1 rounded-full text-4xl font-space font-bold '>
@@ -166,17 +179,65 @@ const Landing = () => {
 
 
 
-        
 
-        <div className='absolute top-22 right-19 movingImg'>
+
+        <motion.div
+          className='absolute top-22 right-19 movingImg'
+          // initial={{
+          //   top: "88px",
+          //   right: "76px",
+          //   rotateY: 0
+          // }}
+          // animate={
+          //   aiJudgeInView
+          //   ? {
+          //     top: "520px",
+          //     right: "20px",
+          //     rotateY: "180"
+          //   }
+          //   : {
+          //     top: "88px",
+          //     right: "76px",
+          //     rotateY: 0
+          //   }
+          // }
+          animate={
+            aiJudgeInView
+              ? {
+                x: -1060,
+                y: 430,
+                rotateY: 180,
+              }
+              : {
+                x: 0,
+                y: 0,
+                rotateY: 0,
+              }
+          }
+          transition={{
+            duration: 1.6,
+            ease: easeInOut
+          }}
+          style={{ transformStyle: "preserve-3d" }}
+        >
           <div className='relative'>
             <img src={organiser} alt="to an oraganiser" className='w-60' />
             <div className='absolute top-70 left-4 font-antonio font-bold text-2xl italic bg-[#b7c4ff] text-[#ffe5a1] rounded-full w-fit px-4 py-1'>to an Organiser</div>
           </div>
-        </div>
+        </motion.div>
 
 
-        <div>what</div>
+
+
+
+        <motion.div animate={{ rotate: 360 }} className='ml-150 mb-50 w-20 bg-pink-950 text-white'>what</motion.div>
+        <motion.div
+          style={example}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2 }}
+        >
+          this
+        </motion.div>
 
       </div>
     </>
