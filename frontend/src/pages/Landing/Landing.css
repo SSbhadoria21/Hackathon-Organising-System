@@ -12,3 +12,39 @@ body {
   color: transparent;
   -webkit-text-stroke: 1.5px black;
 }
+
+
+
+.exploreHeading{
+  color: transparent;
+  -webkit-text-stroke: 1.5px black;
+}
+
+
+.partial-border {
+  position: relative; /* Needed to position the mask */
+  border: 2.5px solid var(--color-dark-blue);
+}
+
+/* Create a white block to cover a portion of the top border */
+.partial-border::after {
+  content: "";
+  position: absolute;
+  top: -2px; /* Align with the top border */
+  left: 400px; /* Where the white portion starts */
+  width: 550px; /* Length of the white portion */
+  height: 2.5px; /* Match border thickness */
+  background-color: white; /* Color to mask the blue */
+}
+
+
+.footerSection{
+  background-image: url("../../assets/cloudsLanding.png");
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.footerText{
+  bottom: 20px;
+}

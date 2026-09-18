@@ -13,6 +13,9 @@ import participantFlipped from '../../assets/participantLandingFlipped.png'
 import organiser from '../../assets/organiserLanding.png'
 import organiserFlipped from '../../assets/organiserLandingFlipped.png'
 import { motion, useInView, useMotionValue, useTransform } from 'motion/react'
+import comingSoon from '../../assets/comingSoon.png'
+import cloudsLanding from '../../assets/cloudsLanding.png'
+import logo from '../../assets/logo.png'
 
 
 const Landing = () => {
@@ -208,9 +211,6 @@ const Landing = () => {
 
         </div>
 
-        <div className='mt-200'>
-          dfkdjd
-        </div>
 
 
 
@@ -362,22 +362,22 @@ const Landing = () => {
                   currentSection === "teamUp" || currentSection === "getDiscovered"
                     ? "#ffe5a1"
                     : "#b7c4ff",
-                left: 
+                left:
                   currentSection === "create"
                     ? 12
                     : currentSection === "aiJudge"
-                        ? 46
-                        : currentSection === "teamUp"
-                            ? 31
-                            : 46,
+                      ? 46
+                      : currentSection === "teamUp"
+                        ? 31
+                        : 46,
                 top:
                   currentSection === "create"
                     ? 280
                     : currentSection === "aiJudge"
-                        ? 280
-                        : currentSection === "teamUp"
-                            ? 220
-                            : 220,
+                      ? 280
+                      : currentSection === "teamUp"
+                        ? 220
+                        : 220,
               }}
             >
               {currentSection === "create" ||
@@ -396,8 +396,57 @@ const Landing = () => {
 
 
 
-
+        {/* serve cards div ends here. */}
       </div>
+
+
+
+
+
+
+
+      <div className='mt-50 pt-15 h-screen rounded-t-[80px] exploreNow'>
+        <div className='flex justify-center'>
+          <h1 className='text-5xl font-bold font-space tracking-tight exploreHeading'>Explore Now...</h1>
+        </div>
+
+        <div className='flex mt-50 justify-center'>
+          <img src={comingSoon} alt="" className='w-100' />
+        </div>
+      </div>
+
+
+
+      <div className='relative footerSection'>
+
+        <div className='z-1000 flex flex-col items-center'>
+          <p className='font-pop mt-39 text-[13px] text-center w-160 leading-6.5'>Whether you're building the next big hackathon or the next big idea, Brevitas is where it happens. <br />Create with ease, judge with AI by your side, team up in seconds, and get discovered for the work you're proud of. The platform is ready — all that's missing is you.
+            <br />Sign up today and be part of what's next.
+          </p>
+
+          <div className='flex items-center justify-center mt-9'>
+            <Button text='Get Started!' className='font-extrabold' textsize='text-xl' px='px-9' />
+          </div>
+        </div>
+
+
+        <div className='relative bg-[#f1f3f8] mt-50 w-auto h-54 mx-6.25 mb-6.25 rounded-2xl partial-border text-center text-sm text-darker-blue font-alef'><p className='absolute bottom-20 left-150 footerText'>Email Phone Developers</p></div>
+
+
+        {/* <div className='absolute z-0 flex justify-center top-0 w-full'>
+          <img src={cloudsLanding} alt="" className='w-full'/>
+        </div> */}
+        <div className='absolute z-0 flex justify-center top-111 w-150 left-105'>
+          <img src={logo} alt="" className='w-full'/>
+        </div>
+      </div>
+
+
+
+      {/* <div className='mt-200'>
+        dfkdjd
+      </div> */}
+
     </>
   )
 }
