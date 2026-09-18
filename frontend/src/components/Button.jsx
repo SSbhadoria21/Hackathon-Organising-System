@@ -17,7 +17,7 @@ const Button = ({
             ${py}
             ${px}
             ${textsize}
-            hover:shadow-sm hover:shadow-blue-950
+            hover:shadow-sm hover:shadow-blue-950 hover:bg-blue-800
             font-alef
             ${bg}
             text-bright-gray

@@ -1,5 +1,4 @@
-import React from 'react'
-import { useRef } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import './Landing.css'
 import laptopLanding from '../../assets/laptopLanding.png'
 import dash1Landing from '../../assets/dash1Landing.png'
@@ -10,23 +9,61 @@ import secondLanding from '../../assets/secondLanding.jpg'
 import thirdLanding from '../../assets/thirdLanding.jpg'
 import fourLanding from '../../assets/fourLanding.jpg'
 import participant from '../../assets/participantLanding.png'
+import participantFlipped from '../../assets/participantLandingFlipped.png'
 import organiser from '../../assets/organiserLanding.png'
-import { easeInOut, motion, useInView } from "motion/react"
+import organiserFlipped from '../../assets/organiserLandingFlipped.png'
+import { motion, useInView, useMotionValue, useTransform } from 'motion/react'
 
 
 const Landing = () => {
-  const aiJudgeRef = useRef()
+  // const [isParticipant, setIsParticipant] = useState(false)
+  const [imgPhase, setImgPhase] = useState("organiser");
+
+  const manageRef = useRef(null)
+  const manageInView = useInView(manageRef, {
+    amount: 0.5
+  })
+
+  const aiJudgeRef = useRef(null)
   const aiJudgeInView = useInView(aiJudgeRef, {
     amount: 0.5
   })
 
-  const example = {
-    width: 40,
-    backgroundColor: "var(--color-dark-blue)",
-    borderRadius: 5,
-    marginLeft: 150,
-    color: 'white'
+  const teamRef = useRef(null)
+  const teamInView = useInView(teamRef, {
+    amount: 0.5
+  })
+
+  const discoveredRef = useRef(null)
+  const discoveredInView = useInView(discoveredRef, {
+    amount: 0.5
+  })
+
+  let currentSection = "create"
+
+  if (discoveredInView) {
+    currentSection = "getDiscovered"
+  } else if (teamInView) {
+    currentSection = "teamUp"
+  } else if (aiJudgeInView) {
+    currentSection = "aiJudge"
   }
+
+  useEffect(() => {
+    const targetPhase =
+      currentSection === "create" || currentSection === "aiJudge"
+        ? "organiser"
+        : "participant";
+
+    if (targetPhase !== imgPhase) {
+      // swap mid-flip (half of the 1.2s transition), when the face is hidden
+      const timer = setTimeout(() => setImgPhase(targetPhase), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [currentSection]);
+
+
+
 
   return (
     <>
@@ -88,7 +125,7 @@ const Landing = () => {
 
 
 
-        <div className='flex items-center mt-20 ml-10 w-230 create&manage'>
+        <div ref={manageRef} className='flex items-center mt-20 ml-10 w-230 create&manage'>
           <div className='w-99.75 h-66.25 bg-violet-400 leftImage'></div>
 
           <div className='ml-6 flex flex-col items-center rightTexts'>
@@ -132,7 +169,7 @@ const Landing = () => {
 
 
 
-        <div className='flex items-center mt-45 ml-10 w-230 teamUp'>
+        <div ref={teamRef} className='flex items-center mt-45 ml-10 w-230 teamUp'>
           <div className='w-99.75 h-66.25 bg-violet-400 leftImage'></div>
 
           <div className='ml-6 flex flex-col items-center rightTexts'>
@@ -152,7 +189,7 @@ const Landing = () => {
 
 
 
-        <div className='flex justify-end mt-45 mr-10 items-center h-auto w-auto getDiscovered'>
+        <div ref={discoveredRef} className='flex justify-end mt-45 mr-10 items-center h-auto w-auto getDiscovered'>
 
           <div className='mr-6 flex flex-col items-center'>
             <div className='bg-light-green/70 text-dark-green px-5 py-1 rounded-full text-4xl font-space font-bold '>
@@ -179,65 +216,186 @@ const Landing = () => {
 
 
 
+        {/* moving image: */}
 
-
-        <motion.div
+        {/* <motion.div
           className='absolute top-22 right-19 movingImg'
-          // initial={{
-          //   top: "88px",
-          //   right: "76px",
-          //   rotateY: 0
-          // }}
-          // animate={
-          //   aiJudgeInView
-          //   ? {
-          //     top: "520px",
-          //     right: "20px",
-          //     rotateY: "180"
-          //   }
-          //   : {
-          //     top: "88px",
-          //     right: "76px",
-          //     rotateY: 0
-          //   }
-          // }
           animate={
             aiJudgeInView
               ? {
                 x: -1060,
                 y: 430,
-                rotateY: 180,
               }
               : {
                 x: 0,
                 y: 0,
-                rotateY: 0,
               }
           }
           transition={{
             duration: 1.6,
             ease: easeInOut
           }}
-          style={{ transformStyle: "preserve-3d" }}
         >
           <div className='relative'>
-            <img src={organiser} alt="to an oraganiser" className='w-60' />
-            <div className='absolute top-70 left-4 font-antonio font-bold text-2xl italic bg-[#b7c4ff] text-[#ffe5a1] rounded-full w-fit px-4 py-1'>to an Organiser</div>
+            <motion.img
+              src={organiser}
+              alt="to an oraganiser"
+              className='w-60'
+              animate={{
+                rotateY: aiJudgeInView ? 180 : 0
+              }}
+              transition={{
+                duration: 1.6,
+                ease: "easeInOut"
+              }}
+              style={{
+                transformStyle: "preserve-3d"
+              }}
+            />
+            <motion.div
+              className='absolute top-70 left-4 font-antonio font-bold text-2xl italic bg-[#b7c4ff] text-[#ffe5a1] rounded-full w-fit px-4 py-1'
+              animate={{
+                marginLeft: aiJudgeInView ? 30 : 0
+              }}
+            >to an Organiser</motion.div>
           </div>
-        </motion.div>
+        </motion.div> */}
 
 
-
-
-
-        <motion.div animate={{ rotate: 360 }} className='ml-150 mb-50 w-20 bg-pink-950 text-white'>what</motion.div>
-        <motion.div
-          style={example}
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2 }}
+        {/* from gpt: */}
+        <div
+          className="absolute top-22 right-19 movingImg"
+          style={{ perspective: 1000 }}
         >
-          this
-        </motion.div>
+          <motion.div
+            className="relative w-60"
+            animate={
+              currentSection === "create"
+                ? {
+                  x: 0,
+                  y: 0,
+                }
+                : currentSection === "aiJudge"
+                  ? {
+                    x: -1060,
+                    y: 430,
+                  }
+                  : currentSection === "teamUp"
+                    ? {
+                      x: 0,
+                      y: 880,
+                    }
+                    : {
+                      x: -1060,
+                      y: 1350,
+                    }
+            }
+            transition={{
+              duration: 1.2,
+              ease: "easeInOut",
+            }}
+          >
+
+
+
+
+            {/* IMAGE */}
+            <motion.div
+              className="relative w-60 h-auto"
+              animate={{
+                rotateY:
+                  currentSection === "create"
+                    ? 0
+                    : currentSection === "aiJudge"
+                      ? 180
+                      : currentSection === "teamUp"
+                        ? 360
+                        : 540,
+              }}
+              transition={{
+                duration: 1.2,
+                ease: "easeInOut",
+              }}
+              style={{
+                transformStyle: "preserve-3d",
+              }}
+            >
+              {/* FRONT FACE — visible at rotateY 0 / 360 */}
+              {/* FRONT FACE */}
+              <img
+                src={imgPhase === "organiser" ? organiser : participant}
+                alt="front"
+                className="w-60"
+                style={{ backfaceVisibility: "hidden" }}
+              />
+
+              {/* BACK FACE */}
+              <img
+                src={imgPhase === "organiser" ? organiserFlipped : participantFlipped}
+                alt="back"
+                className="absolute top-0 left-0 w-60"
+                style={{
+                  transform: "rotateY(180deg)",
+                  backfaceVisibility: "hidden",
+                }}
+              />
+            </motion.div>
+
+
+
+
+
+            {/* LABEL */}
+            <motion.div
+              className="absolute font-antonio font-bold text-2xl italic bg-[#b7c4ff] text-[#ffe5a1] rounded-full w-fit px-4 py-1"
+              animate={{
+                opacity:
+                  currentSection === "teamUp" ||
+                    currentSection === "getDiscovered"
+                    ? 1
+                    : 1,
+                color:
+                  currentSection === "teamUp" || currentSection === "getDiscovered"
+                    ? "#b7c4ff"
+                    : "#ffe5a1",
+                backgroundColor:
+                  currentSection === "teamUp" || currentSection === "getDiscovered"
+                    ? "#ffe5a1"
+                    : "#b7c4ff",
+                left: 
+                  currentSection === "create"
+                    ? 12
+                    : currentSection === "aiJudge"
+                        ? 46
+                        : currentSection === "teamUp"
+                            ? 31
+                            : 46,
+                top:
+                  currentSection === "create"
+                    ? 280
+                    : currentSection === "aiJudge"
+                        ? 280
+                        : currentSection === "teamUp"
+                            ? 220
+                            : 220,
+              }}
+            >
+              {currentSection === "create" ||
+                currentSection === "aiJudge"
+                ? "to an Organiser"
+                : "to a Participant"}
+            </motion.div>
+
+          </motion.div>
+        </div>
+
+
+
+
+
+
+
+
 
       </div>
     </>
