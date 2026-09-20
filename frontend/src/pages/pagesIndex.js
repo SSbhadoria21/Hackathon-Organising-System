@@ -2,11 +2,15 @@ import Home from './Home/Home.jsx'
 import Landing from './Landing/Landing.jsx'
 import LandingLayout from './LandingLayout/LandingLayout.jsx'
 import AppLayout from './AppLayout/AppLayout.jsx'
+import Signup from './Signup/Signup.jsx'
+import Login from './Login/Login.jsx'
 
 
 export {
     Home,
     Landing,
     LandingLayout,
-    AppLayout
+    AppLayout,
+    Signup,
+    Login
 }

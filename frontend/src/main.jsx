@@ -7,7 +7,9 @@ import {
   LandingLayout,
   Landing,
   Home,
-  AppLayout
+  AppLayout,
+  Signup,
+  Login
 } from './pages/pagesIndex.js'
 
 const router = createBrowserRouter([
@@ -24,7 +26,11 @@ const router = createBrowserRouter([
           },
           {
             path: "/signup",
-            element: <Landing/>
+            element: <Signup/>
+          },
+          {
+            path: "/login",
+            element: <Login/>
           }
         ]
       },
