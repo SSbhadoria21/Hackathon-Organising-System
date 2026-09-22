@@ -7,10 +7,10 @@ import { registerSchema } from '@/schemas/auth.schema';
 import { sendVerificationOtp } from '@/lib/mailer';
 import { successResponse, errorResponse } from '@/utils/ApiResponse';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     await dbConnect();
-    const body = await request.json();
+    const body = await req.json();
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
       return errorResponse(
@@ -24,11 +24,11 @@ export async function POST(request: NextRequest) {
 
     const existingUsername = await User.findOne({ username }).lean();
     if (existingUsername) {
-      return errorResponse('Username is already taken', 409);
+      return errorResponse('Username already taken', 409);
     }
     const existingEmail = await User.findOne({ email }).lean();
     if (existingEmail) {
-      return errorResponse('An account with this email already exists', 409);
+      return errorResponse('Email already in use', 409);
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); 
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     await EmailVerification.create({
       userId: user._id,
@@ -54,17 +54,15 @@ export async function POST(request: NextRequest) {
       expiresAt,
     });
 
-
     await sendVerificationOtp(email, fullName, otp);
 
-    
     return successResponse(
       { userId: user._id.toString() },
-      'Account created. Check your email for the 6-digit verification code.',
+      'Account created. Please check your email.',
       201
     );
-  } catch (error: any) {
-    console.error('[REGISTER]', error);
-    return errorResponse(`Internal server error: ${error.message || error.toString()}`, 500, [{ trace: error.stack }]);
+  } catch (err: any) {
+    console.error('Register error:', err);
+    return errorResponse(err.message || 'Something went wrong', 500);
   }
 }

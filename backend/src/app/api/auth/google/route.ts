@@ -8,32 +8,30 @@ import { successResponse, errorResponse } from '@/utils/ApiResponse';
 import { cookies } from 'next/headers';
 import { Types } from 'mongoose';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const body = await request.json();
+    const body = await req.json();
     const { idToken } = body;
 
     if (!idToken || typeof idToken !== 'string') {
-      return errorResponse('Firebase ID token is required', 400);
+      return errorResponse('Token is required', 400);
     }
 
-    
     let firebaseUser: DecodedIdToken;
     try {
       firebaseUser = await auth.verifyIdToken(idToken);
     } catch (err: any) {
-      console.error('[GOOGLE-AUTH] Firebase token verification failed:', err.message);
-      return errorResponse('Invalid or expired Google token. Please sign in again.', 401);
+      console.error('Google token verification failed:', err.message);
+      return errorResponse('Invalid or expired token, please sign in again', 401);
     }
 
     const { uid, email, name, picture } = firebaseUser;
 
     if (!email) {
-      return errorResponse('Google account does not have an email address', 400);
+      return errorResponse('Google account has no email', 400);
     }
-
 
     let user = await User.findOne({ email: email.toLowerCase() });
 
@@ -53,17 +51,16 @@ export async function POST(request: NextRequest) {
         username,
         fullName: name || email.split('@')[0],
         email: email.toLowerCase(),
-        password: null,         
+        password: null,
         googleId: uid,
         avatar: picture || undefined,
-        gender: 'OTHER',      
-        bio: 'Google sign-in user', 
-        isEmailVerified: true,   
+        gender: 'OTHER',
+        bio: 'Google sign-in user',
+        isEmailVerified: true,
         role: 'USER',
       });
     }
 
-    
     const accessToken = generateAccessToken(user._id as Types.ObjectId, user.role);
     const refreshToken = generateRefreshToken(user._id as Types.ObjectId);
 
@@ -91,13 +88,13 @@ export async function POST(request: NextRequest) {
       isEmailVerified: user.isEmailVerified,
     };
 
-    const isNewUser = !firebaseUser.email; 
+    const isNewUser = !firebaseUser.email;
     return successResponse(
       { user: safeUser, accessToken },
       user.googleId === uid && !isNewUser ? 'Signed in with Google' : 'Account created with Google'
     );
-  } catch (error: any) {
-    console.error('[GOOGLE-AUTH]', error);
-    return errorResponse('Internal server error', 500);
+  } catch (err: any) {
+    console.error('Google auth error:', err);
+    return errorResponse('Something went wrong', 500);
   }
 }

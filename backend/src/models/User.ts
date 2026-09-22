@@ -11,6 +11,11 @@ export interface IUser extends Document {
   gender: 'MALE' | 'FEMALE' | 'OTHER';
   bio: string;
   about?: string;
+  skills: string[];
+  collegeOrCompany?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
   role: 'USER' | 'SUPER_ADMIN';
   isEmailVerified: boolean; 
   refreshToken?: string;
@@ -20,22 +25,30 @@ export interface IUser extends Document {
 
 const UserSchema: Schema<IUser> = new Schema(
   {
-    username:    { type: String, required: true, unique: true, lowercase: true, trim: true },
-    fullName:    { type: String, required: true },
-    email:       { type: String, required: true, unique: true, lowercase: true, trim: true },
+    username:         { type: String, required: true, unique: true, lowercase: true, trim: true },
+    fullName:         { type: String, required: true },
+    email:            { type: String, required: true, unique: true, lowercase: true, trim: true },
 
-    password:    { type: String, default: null },
-    googleId:    { type: String, sparse: true, unique: true },
-    avatar:      { type: String },
-    gender:      { type: String, enum: ['MALE', 'FEMALE', 'OTHER'], required: true },
-    bio:         { type: String, required: true },
-    about:       { type: String },
-    role:           { type: String, enum: ['USER', 'SUPER_ADMIN'], default: 'USER' },
-    isEmailVerified:{ type: Boolean, default: false },
-    refreshToken:   { type: String },
+    password:         { type: String, default: null },
+    googleId:         { type: String, sparse: true, unique: true },
+    avatar:           { type: String },
+    gender:           { type: String, enum: ['MALE', 'FEMALE', 'OTHER'], required: true },
+    bio:              { type: String, required: true },
+    about:            { type: String },
+    skills:           { type: [String], default: [] },
+    collegeOrCompany: { type: String },
+    githubUrl:        { type: String },
+    linkedinUrl:      { type: String },
+    portfolioUrl:     { type: String },
+    role:             { type: String, enum: ['USER', 'SUPER_ADMIN'], default: 'USER' },
+    isEmailVerified:  { type: Boolean, default: false },
+    refreshToken:     { type: String },
   },
   { timestamps: true }
 );
 
+UserSchema.index({ username: 'text', fullName: 'text' });
+
 export const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+

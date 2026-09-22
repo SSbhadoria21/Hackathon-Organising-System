@@ -8,11 +8,11 @@ import { successResponse, errorResponse } from '@/utils/ApiResponse';
 import { cookies } from 'next/headers';
 import { Types } from 'mongoose';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const body = await request.json();
+    const body = await req.json();
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
       return errorResponse(
@@ -30,27 +30,26 @@ export async function POST(request: NextRequest) {
     );
 
     if (!user) {
-
-      return errorResponse('Invalid credentials', 401);
+      return errorResponse('Invalid email or password', 401);
     }
 
     if (!user.isEmailVerified) {
       return errorResponse(
-        'Email not verified. Please verify your email before logging in.',
+        'Please verify your email first',
         403,
         [{ field: 'email', message: 'Email not verified', userId: user._id.toString() }]
       );
     }
     if (!user.password) {
       return errorResponse(
-        'This account uses Google Sign-In. Please sign in with Google.',
+        'Please sign in with Google',
         400
       );
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return errorResponse('Invalid credentials', 401);
+      return errorResponse('Invalid email or password', 401);
     }
 
     const accessToken = generateAccessToken(user._id as Types.ObjectId, user.role);
@@ -62,8 +61,6 @@ export async function POST(request: NextRequest) {
     cookieStore.set('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60,
       path: '/',
     });
 
@@ -81,8 +78,8 @@ export async function POST(request: NextRequest) {
     };
 
     return successResponse({ user: safeUser, accessToken }, 'Login successful');
-  } catch (error: any) {
-    console.error('[LOGIN]', error);
-    return errorResponse('Internal server error', 500);
+  } catch (err: any) {
+    console.error('Login error:', err);
+    return errorResponse('Something went wrong, please try again', 500);
   }
 }

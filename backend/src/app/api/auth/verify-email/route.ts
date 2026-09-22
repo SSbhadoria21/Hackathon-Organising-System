@@ -8,11 +8,11 @@ import { successResponse, errorResponse } from '@/utils/ApiResponse';
 import { cookies } from 'next/headers';
 import { Types } from 'mongoose';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const body = await request.json();
+    const body = await req.json();
     const parsed = verifyEmailSchema.safeParse(body);
     if (!parsed.success) {
       return errorResponse(
@@ -30,19 +30,17 @@ export async function POST(request: NextRequest) {
     }).sort({ createdAt: -1 });
 
     if (!verificationDoc) {
-      return errorResponse('No verification code found. Please request a new one.', 404);
+      return errorResponse('No OTP found, please request a new one', 404);
     }
 
     if (verificationDoc.expiresAt < new Date()) {
-      return errorResponse('Verification code has expired. Please request a new one.', 410);
+      return errorResponse('OTP expired, please request a new one', 410);
     }
-
 
     if (verificationDoc.token !== otp) {
-      return errorResponse('Invalid verification code', 400);
+      return errorResponse('Invalid OTP', 400);
     }
 
-    
     const user = await User.findByIdAndUpdate(
       userId,
       { isEmailVerified: true },
@@ -53,7 +51,6 @@ export async function POST(request: NextRequest) {
       return errorResponse('User not found', 404);
     }
 
-    
     await EmailVerification.deleteMany({ userId: user._id, type: 'EMAIL_VERIFY' });
 
     const accessToken = generateAccessToken(user._id as Types.ObjectId, user.role);
@@ -65,16 +62,16 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60, 
+      maxAge: 7 * 24 * 60 * 60,
       path: '/',
     });
 
     return successResponse(
       { user, accessToken },
-      'Email verified successfully. You are now logged in.'
+      'Email verified successfully'
     );
-  } catch (error: any) {
-    console.error('[VERIFY-EMAIL]', error);
-    return errorResponse('Internal server error', 500);
+  } catch (err: any) {
+    console.error('Verify email error:', err);
+    return errorResponse('Something went wrong, please try again', 500);
   }
 }

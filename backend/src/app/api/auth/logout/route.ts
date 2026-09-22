@@ -5,11 +5,11 @@ import { requireAuth } from '@/lib/withAuth';
 import { successResponse, errorResponse } from '@/utils/ApiResponse';
 import { cookies } from 'next/headers';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const auth = requireAuth(request);
+    const auth = requireAuth(req);
     if (auth instanceof Response) return auth;
 
     await User.findByIdAndUpdate(auth._id, { refreshToken: null });
@@ -19,13 +19,13 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 0, 
+      maxAge: 0,
       path: '/',
     });
 
     return successResponse(null, 'Logged out successfully');
-  } catch (error: any) {
-    console.error('[LOGOUT]', error);
-    return errorResponse('Internal server error', 500);
+  } catch (err: any) {
+    console.error('Logout error:', err);
+    return errorResponse('Something went wrong', 500);
   }
 }

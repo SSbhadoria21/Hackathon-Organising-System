@@ -7,11 +7,11 @@ import { sendVerificationOtp } from '@/lib/mailer';
 import { successResponse, errorResponse } from '@/utils/ApiResponse';
 import { Types } from 'mongoose';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     await dbConnect();
 
-    const body = await request.json();
+    const body = await req.json();
     const parsed = resendOtpSchema.safeParse(body);
     if (!parsed.success) {
       return errorResponse('Validation failed', 400);
@@ -33,10 +33,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (recent) {
-      return errorResponse('Please wait 60 seconds before requesting a new code', 429);
+      return errorResponse('Please wait a minute before requesting again', 429);
     }
 
-    
     await EmailVerification.deleteMany({ userId: user._id, type: 'EMAIL_VERIFY' });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -52,9 +51,9 @@ export async function POST(request: NextRequest) {
 
     await sendVerificationOtp(user.email, user.fullName, otp);
 
-    return successResponse(null, 'New verification code sent to your email');
-  } catch (error: any) {
-    console.error('[RESEND-OTP]', error);
-    return errorResponse('Internal server error', 500);
+    return successResponse(null, 'OTP sent to your email');
+  } catch (err: any) {
+    console.error('Resend OTP error:', err);
+    return errorResponse('Something went wrong, please try again', 500);
   }
 }

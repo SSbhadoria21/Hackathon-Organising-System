@@ -29,20 +29,20 @@ export interface IResult extends Document {
 
 const ResultSchema: Schema<IResult> = new Schema(
   {
-    hackathonId:  { type: Schema.Types.ObjectId, ref: 'Hackathon', required: true },
-    roundId:      { type: Schema.Types.ObjectId, ref: 'Round', required: true },
-    teamId:       { type: Schema.Types.ObjectId, ref: 'Team', required: true },
-    submissionId: { type: Schema.Types.ObjectId, ref: 'Submission', required: true },
+    hackathonId:{ type: Schema.Types.ObjectId, ref: 'Hackathon', required: true },
+    roundId:{ type: Schema.Types.ObjectId, ref: 'Round', required: true },
+    teamId:{ type: Schema.Types.ObjectId, ref: 'Team', required: true },
+    submissionId:{ type: Schema.Types.ObjectId, ref: 'Submission', required: true },
 
-    aiScoreTotal:    { type: Number, required: true, min: 0, max: 100 },
+    aiScoreTotal:{ type: Number, required: true, min: 0, max: 100 },
     humanScoreTotal: { type: Number, required: true, min: 0, max: 100 },
-    finalScore:      { type: Number, required: true, min: 0, max: 100 },
+    finalScore:{ type: Number, required: true, min: 0, max: 100 },
 
-    aiWeightUsed:    { type: Number, required: true },
-    judgeWeightUsed: { type: Number, required: true },
+    aiWeightUsed:{ type: Number, required: true },
+    judgeWeightUsed:{ type: Number, required: true },
 
-    rank:     { type: Number },
-    advanced: { type: Boolean, required: true, default: false },
+    rank:{ type: Number },
+    advanced:{ type: Boolean, required: true, default: false },
 
     flaggedForReview: { type: Boolean, default: false },
     reviewOutcome: {

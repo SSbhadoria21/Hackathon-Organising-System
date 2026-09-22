@@ -17,8 +17,10 @@ const TeamSchema: Schema<ITeam> = new Schema(
     name:       { type: String, required: true, trim: true },
 
     hackathonId:{ type: Schema.Types.ObjectId, ref: 'Hackathon', required: true },
+
     inviteCode: { type: String, required: true, unique: true },
     members:    [{ type: Schema.Types.ObjectId, ref: 'User' }],
+
     leaderId:   { type: Schema.Types.ObjectId, ref: 'User', required: true },
     paymentStatus: {
       type: String,
@@ -30,7 +32,6 @@ const TeamSchema: Schema<ITeam> = new Schema(
 );
 
 TeamSchema.index({ hackathonId: 1 });
-TeamSchema.index({ inviteCode: 1 });
 TeamSchema.index({ hackathonId: 1, members: 1 });
 
 export const Team: Model<ITeam> =

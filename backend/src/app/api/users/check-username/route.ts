@@ -3,18 +3,18 @@ import dbConnect from '@/lib/mongodb';
 import { User } from '@/models/User';
 import { successResponse, errorResponse } from '@/utils/ApiResponse';
 
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const username = request.nextUrl.searchParams.get('username');
+    const username = req.nextUrl.searchParams.get('username');
 
     if (!username) {
-      return errorResponse('Username query param is required', 400);
+      return errorResponse('Username query is required', 400);
     }
 
     if (!/^[a-z0-9_]{3,30}$/.test(username.toLowerCase())) {
       return successResponse(
         { available: false, reason: 'invalid_format' },
-        'Username can only contain lowercase letters, numbers, and underscores (3–30 chars)'
+        'Username can only have lowercase letters, numbers, and underscores (3–30 chars)'
       );
     }
 
@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
     }
 
     return successResponse({ available: true }, 'Username is available');
-  } catch (error: any) {
-    console.error('[CHECK-USERNAME]', error);
-    return errorResponse('Internal server error', 500);
+  } catch (err: any) {
+    console.error('Check username error:', err);
+    return errorResponse('Something went wrong', 500);
   }
 }

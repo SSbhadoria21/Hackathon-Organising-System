@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export type NotificationType =
   | 'TEAM_INVITE'        
+  | 'JUDGE_INVITE'
   | 'ROUND_OPEN'         
   | 'ROUND_RESULT'       
   | 'RESULT_PUBLISHED'   
@@ -30,6 +31,7 @@ const NotificationSchema: Schema<INotification> = new Schema(
       type: String,
       enum: [
         'TEAM_INVITE',
+        'JUDGE_INVITE',
         'ROUND_OPEN',
         'ROUND_RESULT',
         'RESULT_PUBLISHED',
@@ -39,10 +41,10 @@ const NotificationSchema: Schema<INotification> = new Schema(
       ],
       required: true,
     },
-    title:    { type: String, required: true },
-    message:  { type: String, required: true },
-    metadata: { type: Map, of: String },
-    read:     { type: Boolean, default: false },
+    title:{ type: String, required: true },
+    message:{ type: String, required: true },
+    metadata:{ type: Map, of: String },
+    read:{ type: Boolean, default: false },
     actionStatus: {
       type: String,
       enum: ['PENDING', 'ACCEPTED', 'DECLINED'],

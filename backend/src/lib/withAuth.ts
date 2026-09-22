@@ -5,14 +5,17 @@ export interface AuthPayload {
   role: 'USER' | 'SUPER_ADMIN';
 }
 
+export type TAuth = AuthPayload;
+
 export interface JudgeAuthPayload {
   judgeId: string;
   hackathonId: string;
 }
 
+export type TJudgeAuth = JudgeAuthPayload;
 
-export function getAuthUser(request: NextRequest): AuthPayload | null {
-  const authHeader = request.headers.get('authorization');
+export function getAuthUser(req: NextRequest): AuthPayload | null {
+  const authHeader = req.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
 
   const token = authHeader.slice(7);
@@ -29,8 +32,8 @@ export function getAuthUser(request: NextRequest): AuthPayload | null {
   }
 }
 
-export function getAuthJudge(request: NextRequest): JudgeAuthPayload | null {
-  const authHeader = request.headers.get('authorization');
+export function getAuthJudge(req: NextRequest): JudgeAuthPayload | null {
+  const authHeader = req.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
 
   const token = authHeader.slice(7);
@@ -47,28 +50,28 @@ export function getAuthJudge(request: NextRequest): JudgeAuthPayload | null {
   }
 }
 
-export function requireAuth(request: NextRequest): AuthPayload | Response {
-  const auth = getAuthUser(request);
+export function requireAuth(req: NextRequest): AuthPayload | Response {
+  const auth = getAuthUser(req);
   if (!auth) {
     return Response.json(
-      { success: false, message: 'Unauthorized — please login' },
+      { success: false, message: 'Please login to continue' },
       { status: 401 }
     );
   }
   return auth;
 }
- 
-export function requireSuperAdmin(request: NextRequest): AuthPayload | Response {
-  const auth = getAuthUser(request);
+
+export function requireSuperAdmin(req: NextRequest): AuthPayload | Response {
+  const auth = getAuthUser(req);
   if (!auth) {
     return Response.json(
-      { success: false, message: 'Unauthorized — please login' },
+      { success: false, message: 'Please login to continue' },
       { status: 401 }
     );
   }
   if (auth.role !== 'SUPER_ADMIN') {
     return Response.json(
-      { success: false, message: 'Forbidden — super admin access required' },
+      { success: false, message: 'Admin access required' },
       { status: 403 }
     );
   }
