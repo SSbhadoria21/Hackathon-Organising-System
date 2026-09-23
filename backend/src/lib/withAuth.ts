@@ -16,9 +16,12 @@ export type TJudgeAuth = JudgeAuthPayload;
 
 export function getAuthUser(req: NextRequest): AuthPayload | null {
   const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
+  let token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
-  const token = authHeader.slice(7);
+  if (!token) {
+    token = req.cookies.get('accessToken')?.value || null;
+  }
+
   if (!token) return null;
 
   try {

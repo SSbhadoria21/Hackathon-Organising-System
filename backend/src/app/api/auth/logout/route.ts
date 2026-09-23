@@ -15,9 +15,19 @@ export async function POST(req: NextRequest) {
     await User.findByIdAndUpdate(auth._id, { refreshToken: null });
 
     const cookieStore = await cookies();
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    cookieStore.set('accessToken', '', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 0,
+      path: '/',
+    });
+
     cookieStore.set('refreshToken', '', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'strict',
       maxAge: 0,
       path: '/',

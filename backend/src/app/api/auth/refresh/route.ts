@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
         await User.findByIdAndUpdate(user._id, { refreshToken: null });
         const cookieStore = await cookies();
         cookieStore.delete('refreshToken');
+        cookieStore.delete('accessToken');
       }
       return errorResponse('Session expired, please login again', 401);
     }
@@ -41,9 +42,19 @@ export async function POST(req: NextRequest) {
     await User.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken });
 
     const newCookieStore = await cookies();
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    newCookieStore.set('accessToken', newAccessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 15 * 60, // 15 minutes
+      path: '/',
+    });
+
     newCookieStore.set('refreshToken', newRefreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60,
       path: '/',
