@@ -14,8 +14,8 @@ export const registerSchema = z.object({
     .max(72, 'Password is too long')
     .regex(/[A-Z]/, 'Password must have at least one uppercase letter')
     .regex(/[0-9]/, 'Password must have at least one number'),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER'], { message: 'Please select a valid gender' }),
-  bio: z.string().min(10, 'Bio must be at least 10 characters').max(200),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).or(z.literal('')).optional(),
+  bio: z.string().max(200, 'Bio cannot exceed 200 characters').optional(),
   about: z.string().max(1000).optional(),
 });
 

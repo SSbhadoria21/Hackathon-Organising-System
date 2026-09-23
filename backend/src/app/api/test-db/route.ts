@@ -7,7 +7,7 @@ export async function GET() {
     await dbConnect();
     const count = await User.countDocuments();
     return NextResponse.json({ status: 'Connected', usersCount: count });
-  } catch (error: any) {
-    return NextResponse.json({ status: 'Error', message: error.message }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ status: 'Error', message: err.message }, { status: 500 });
   }
 }

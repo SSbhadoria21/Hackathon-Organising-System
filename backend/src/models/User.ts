@@ -8,8 +8,8 @@ export interface IUser extends Document {
   password: string | null;
   googleId?: string;      
   avatar?: string;        
-  gender: 'MALE' | 'FEMALE' | 'OTHER';
-  bio: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  bio?: string;
   about?: string;
   skills: string[];
   collegeOrCompany?: string;
@@ -32,8 +32,8 @@ const UserSchema: Schema<IUser> = new Schema(
     password:         { type: String, default: null },
     googleId:         { type: String, sparse: true, unique: true },
     avatar:           { type: String },
-    gender:           { type: String, enum: ['MALE', 'FEMALE', 'OTHER'], required: true },
-    bio:              { type: String, required: true },
+    gender:           { type: String, enum: ['MALE', 'FEMALE', 'OTHER'] },
+    bio:              { type: String, default: '' },
     about:            { type: String },
     skills:           { type: [String], default: [] },
     collegeOrCompany: { type: String },

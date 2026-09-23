@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
       fullName,
       email,
       password: hashedPassword,
-      gender,
-      bio,
+      gender: gender || undefined,
+      bio: bio || '',
       about,
       isEmailVerified: false,
     });
