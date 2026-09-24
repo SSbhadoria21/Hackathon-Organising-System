@@ -4,6 +4,7 @@ import LandingLayout from './LandingLayout/LandingLayout.jsx'
 import AppLayout from './AppLayout/AppLayout.jsx'
 import Signup from './Signup/Signup.jsx'
 import Login from './Login/Login.jsx'
+import EmailVerification from './EmailVerification/EmailVerification.jsx'
 
 
 export {
@@ -12,5 +13,6 @@ export {
     LandingLayout,
     AppLayout,
     Signup,
-    Login
+    Login,
+    EmailVerification
 }

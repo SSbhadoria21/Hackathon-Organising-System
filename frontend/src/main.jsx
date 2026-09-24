@@ -9,7 +9,8 @@ import {
   Home,
   AppLayout,
   Signup,
-  Login
+  Login,
+  EmailVerification
 } from './pages/pagesIndex.js'
 
 const router = createBrowserRouter([
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
           {
             path: "/signup",
             element: <Signup/>
+          },
+          {
+            path: "/verify-email",
+            element: <EmailVerification/>
           },
           {
             path: "/login",

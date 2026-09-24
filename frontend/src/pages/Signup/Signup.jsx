@@ -1,11 +1,31 @@
-import React from 'react'
+import React, {useState} from 'react'
 import signupPeople from '../../assets/signupPeople.png'
 import './Signup.css';
 import { Link } from 'react-router-dom';
 import Button from '../../components/Button';
+import { useForm } from 'react-hook-form'
+import authService from '../../backend/auth.js'
 
 const Signup = () => {
-    
+    const { register, handleSubmit } = useForm()
+    const [error, setError] = useState("")
+
+    const create = async (data) => {
+        setError("")
+        try {
+            const userData = await authService.createAccount(data)
+            if (userData) {
+                navigate('/verify-email', {
+                    state: {
+                        userId: userData.userId
+                    }
+                })
+            }
+
+        } catch (error) {
+            setError(error.message)
+        }
+    }
 
     return (
         <>
@@ -38,29 +58,30 @@ const Signup = () => {
                 </div>
 
                 <div className='absolute top-30 left-140'>
-                    <form className='flex flex-col items-center gap-10'>
+                    <form onSubmit={handleSubmit(create)} className='flex flex-col items-center gap-10'>
                         <div className='flex flex-col'>
                             <label htmlFor="email" className='font-pop text-darker-blue'>Email</label>
-                            <input id='email' type="text" placeholder='example@mail.com' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("email",{required: true})}/> //TODO: validnation lagao email ka or password and all sabka
+                            <input id='email' type="text" placeholder='example@mail.com' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("email", { required: true })} /> 
                         </div>
+                        {/* //TODO: validnation lagao email ka or password and all sabka */}
 
                         <div className='flex flex-col'>
                             <label htmlFor="password" className='font-pop text-darker-blue'>Password</label>
-                            <input id='password' type="password" placeholder='password' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("password",{required: true})}/>
+                            <input id='password' type="password" placeholder='password' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("password", { required: true })} />
                         </div>
 
                         <div className='flex flex-col'>
                             <label htmlFor="username" className='font-pop text-darker-blue'>Username</label>
-                            <input id='username' type="text" placeholder='username' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("username",{required: true})}/>
+                            <input id='username' type="text" placeholder='username' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("username", { required: true })} />
                         </div>
 
                         <div className='flex flex-col'>
                             <label htmlFor="fullName" className='font-pop text-darker-blue'>Full Name</label>
-                            <input id='fullName' type="text" placeholder='What should we call you?' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("fullName",{required: true})}/>
+                            <input id='fullName' type="text" placeholder='What should we call you?' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("fullName", { required: true })} />
                         </div>
 
                         <div className='flex items-center justify-center mt-2'>
-                            <Button text='Submit' className='font-extrabold' textsize='text-xl' px='px-9' rounded='rounded-full'/>
+                            <Button type='submit' text='Submit' className='font-extrabold' textsize='text-xl' px='px-9' rounded='rounded-full' />
                         </div>
                     </form>
                 </div>
