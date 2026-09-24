@@ -16,6 +16,7 @@ import { motion, useInView, useMotionValue, useTransform } from 'motion/react'
 import comingSoon from '../../assets/comingSoon.png'
 import cloudsLanding from '../../assets/cloudsLanding.png'
 import logo from '../../assets/logo.png'
+import { useNavigate } from 'react-router-dom'
 
 
 const Landing = () => {
@@ -67,6 +68,7 @@ const Landing = () => {
 
 
 
+  const navigate = useNavigate()
 
   return (
     <>
@@ -101,7 +103,7 @@ const Landing = () => {
           </div>
 
           <div className='flex items-center justify-center mt-8'>
-            <Button text='Get Started!' className='font-extrabold' textsize='text-xl' px='px-9' />
+            <Button text='Get Started!' className='font-extrabold' textsize='text-xl' px='px-9' onClick={()=>navigate('/signup')}/>
           </div>
 
         </div>
@@ -425,7 +427,7 @@ const Landing = () => {
           </p>
 
           <div className='flex items-center justify-center mt-9'>
-            <Button text='Get Started!' className='font-extrabold' textsize='text-xl' px='px-9' />
+            <Button text='Get Started!' className='font-extrabold' textsize='text-xl' px='px-9' onClick={()=>navigate('/signup')}/>
           </div>
         </div>
 

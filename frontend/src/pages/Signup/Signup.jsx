@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import Button from '../../components/Button';
 
 const Signup = () => {
+    
+
     return (
         <>
             {/* <div className='relative'
@@ -39,22 +41,22 @@ const Signup = () => {
                     <form className='flex flex-col items-center gap-10'>
                         <div className='flex flex-col'>
                             <label htmlFor="email" className='font-pop text-darker-blue'>Email</label>
-                            <input id='email' type="text" placeholder='example@mail.com' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' />
+                            <input id='email' type="text" placeholder='example@mail.com' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("email",{required: true})}/> //TODO: validnation lagao email ka or password and all sabka
                         </div>
 
                         <div className='flex flex-col'>
                             <label htmlFor="password" className='font-pop text-darker-blue'>Password</label>
-                            <input id='password' type="password" placeholder='password' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' />
+                            <input id='password' type="password" placeholder='password' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("password",{required: true})}/>
                         </div>
 
                         <div className='flex flex-col'>
                             <label htmlFor="username" className='font-pop text-darker-blue'>Username</label>
-                            <input id='username' type="text" placeholder='username' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' />
+                            <input id='username' type="text" placeholder='username' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("username",{required: true})}/>
                         </div>
 
                         <div className='flex flex-col'>
                             <label htmlFor="fullName" className='font-pop text-darker-blue'>Full Name</label>
-                            <input id='fullName' type="text" placeholder='What should we call you?' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' />
+                            <input id='fullName' type="text" placeholder='What should we call you?' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("fullName",{required: true})}/>
                         </div>
 
                         <div className='flex items-center justify-center mt-2'>

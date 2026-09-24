@@ -3,15 +3,19 @@ import '../index.css'
 import logo from '../assets/logo.png'
 import { Button } from '../components/componentsIndex.js'
 import { NavLink } from "react-router-dom"
+import { useNavigate } from 'react-router-dom'
 
 const LandingNavbar = () => {
+
+  const navigate = useNavigate()
+
   return (
     <>
       <div className='flex justify-between gap-2'>
         <div className='flex justify-around w-7xl h-10 rounded-b-full bg-navbar-bg navbar'>
-          <Button text='Signup/Login' className='mt-2.5'/>
+          <Button text='Signup/Login' className='mt-2.5' onClick={()=>navigate('/signup')}/>
           <NavLink
-            to="/about"
+            to="/"
             className={({ isActive }) =>
               `relative group text-[12px] mt-2.5 ${isActive ? 'underline' : 'text-darker-blue'
               }`
