@@ -1,11 +1,14 @@
 import React from 'react'
-// import LandingNavbar from '../../components/LandingNavbar/jsx'
+import { AppNavbar } from '../../components/componentsIndex'
 import { Outlet } from 'react-router-dom'
 
 const AppLayout = () => {
   return (
     <div>
-        {/* <LandingNavbar/> */}
+      <div className='fixed top-0 z-100'>
+
+        <AppNavbar/>
+      </div>
         <Outlet/>
     </div>
   )

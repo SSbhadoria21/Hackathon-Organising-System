@@ -10,7 +10,8 @@ import {
   AppLayout,
   Signup,
   Login,
-  EmailVerification
+  EmailVerification,
+  CreateHackathon
 } from './pages/pagesIndex.js'
 
 const router = createBrowserRouter([
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
           {
             path: "/home",
             element: <Home/>
+          },
+          {
+            path: "/create-hackathon",
+            element: <CreateHackathon/>
           }
         ]
       }
