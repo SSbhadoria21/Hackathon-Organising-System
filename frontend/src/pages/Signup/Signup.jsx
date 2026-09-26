@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import signupPeople from '../../assets/signupPeople.png'
 import './Signup.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
 import { useForm } from 'react-hook-form'
 import authService from '../../backend/auth.js'
@@ -9,15 +9,17 @@ import authService from '../../backend/auth.js'
 const Signup = () => {
     const { register, handleSubmit } = useForm()
     const [error, setError] = useState("")
+    const navigate = useNavigate()
 
     const create = async (data) => {
         setError("")
         try {
             const userData = await authService.createAccount(data)
+            console.log("REGISTER RESPONSE:", userData)
             if (userData) {
                 navigate('/verify-email', {
                     state: {
-                        userId: userData.userId
+                        userId: userData.data.userId
                     }
                 })
             }

@@ -13,31 +13,41 @@ const LandingNavbar = () => {
     <>
       <div className='flex justify-between gap-2'>
         <div className='flex justify-around w-7xl h-10 rounded-b-full bg-navbar-bg navbar'>
-          <Button text='Signup/Login' className='mt-2.5' onClick={()=>navigate('/signup')}/>
+          <Button text='Signup/Login' className='mt-2.5' onClick={() => navigate('/signup')} />
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `relative group text-[12px] mt-2.5 ${isActive ? 'underline' : 'text-darker-blue'
+              `relative group text-[12px] mt-2.5 ${isActive ? 'text-dark-green font-extrabold' : 'text-darker-blue'
               }`
             }
           >
             Home
             <span className="absolute left-0 bottom-0 h-0.5 w-full bg-dark-blue scale-x-0 origin-left transition-transform duration-200 group-hover:scale-x-100" />
           </NavLink>
-          <NavLink
-            to="/about"
+
+          {/* <NavLink
+            to="#what-we-serve"
             className={({ isActive }) =>
-              `relative group text-[12px] mt-2.5 ${isActive ? 'underline' : 'text-darker-blue'
-              }`
+              `relative group text-[12px] mt-2.5 ${isActive ? '' : 'text-darker-blue'
+              } active:text-dark-green active:font-extrabold`
             }
           >
             About
             <span className="absolute left-0 bottom-0 h-0.5 w-full bg-dark-blue scale-x-0 origin-left transition-transform duration-200 group-hover:scale-x-100" />
-          </NavLink>
+          </NavLink> */}
+
+          <a
+            href="#what-we-serve"
+            className="relative group text-[12px] mt-2.5 text-darker-blue active:text-dark-green active:font-extrabold"
+          >
+            About
+            <span className="absolute left-0 bottom-0 h-0.5 w-full bg-dark-blue scale-x-0 origin-left transition-transform duration-200 group-hover:scale-x-100" />
+          </a>
+
           <NavLink
-            to="/about"
+            to="/developers"
             className={({ isActive }) =>
-              `relative group text-[12px] mt-2.5 ${isActive ? 'underline' : 'text-darker-blue'
+              `relative group text-[12px] mt-2.5 ${isActive ? 'text-dark-green font-extrabold' : 'text-darker-blue'
               }`
             }
           >

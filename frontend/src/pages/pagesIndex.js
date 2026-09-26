@@ -6,6 +6,7 @@ import Signup from './Signup/Signup.jsx'
 import Login from './Login/Login.jsx'
 import EmailVerification from './EmailVerification/EmailVerification.jsx'
 import CreateHackathon from './CreateHackathon/CreateHackathon.jsx'
+import Developers from './Developers.jsx'
 
 
 export {
@@ -16,5 +17,6 @@ export {
     Signup,
     Login,
     EmailVerification,
-    CreateHackathon
+    CreateHackathon,
+    Developers
 }

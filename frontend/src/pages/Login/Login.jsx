@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import signupPeople from '../../assets/loginPeople.png'
 import './Login.css';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ const Login = () => {
         try {
             const userData = await authService.loginAccount(data)
             if(userData){
-                
+                navigate('/home')
             }
         } catch (error) {
             setError(error.message)
@@ -61,7 +61,7 @@ const Login = () => {
                         
                         <div className='flex flex-col'>
                             <label htmlFor="username" className='font-pop text-darker-blue'>Username</label>
-                            <input id='username' type="text" placeholder='username' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("indentifier", {required: true})}/>
+                            <input id='username' type="text" placeholder='username' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("identifier", {required: true})}/>
                         </div>
 
                         <div className='flex flex-col'>
