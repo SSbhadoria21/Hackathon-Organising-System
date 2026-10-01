@@ -24,6 +24,10 @@ const Button = ({
             ${rounded}
             ${className}
             active:bg-blue-700
+            disabled:shadow-none
+            disabled:bg-dark-blue
+            disabled:cursor-not-allowed
+            disabled:opacity-80
             `}
         {...props}>
         {text}
