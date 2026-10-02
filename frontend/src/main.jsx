@@ -12,7 +12,10 @@ import {
   Login,
   EmailVerification,
   CreateHackathon,
-  Developers
+  Developers,
+  MyTeams,
+  Reminders,
+  Achievers
 } from './pages/pagesIndex.js'
 
 const router = createBrowserRouter([
@@ -55,6 +58,18 @@ const router = createBrowserRouter([
           {
             path: "/create-hackathon",
             element: <CreateHackathon/>
+          },
+          {
+            path: "/my-teams",
+            element: <MyTeams/>
+          },
+          {
+            path: "/reminders",
+            element: <Reminders/>
+          },
+          {
+            path: "/achievers",
+            element: <Achievers/>
           }
         ]
       }
