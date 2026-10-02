@@ -1,31 +1,33 @@
-body {
-  background-image: 
+/* body {
+  background-image:
     linear-gradient(to right, rgba(200, 200, 200, 0.3) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(200, 200, 200, 0.3) 1px, transparent 1px);
   background-size: 100px 100px;
-  background-color: var(--landing-bg); /* Change to your preferred background color */
-    overflow-x: hidden;
+  background-color: var(--landing-bg);
+  overflow-x: hidden;
 
-}
+} */
+
 html {
   scroll-behavior: smooth;
 }
 
-.serveQues{
+.serveQues {
   color: transparent;
   -webkit-text-stroke: 1.5px black;
 }
 
 
 
-.exploreHeading{
+.exploreHeading {
   color: transparent;
   -webkit-text-stroke: 1.5px black;
 }
 
 
 .partial-border {
-  position: relative; /* Needed to position the mask */
+  position: relative;
+  /* Needed to position the mask */
   border: 2.5px solid var(--color-dark-blue);
 }
 
@@ -33,25 +35,43 @@ html {
 .partial-border::after {
   content: "";
   position: absolute;
-  top: -2px; /* Align with the top border */
-  left: 400px; /* Where the white portion starts */
-  width: 550px; /* Length of the white portion */
-  height: 2.5px; /* Match border thickness */
-  background-color: white; /* Color to mask the blue */
+  top: -2px;
+  /* Align with the top border */
+  left: 400px;
+  /* Where the white portion starts */
+  width: 550px;
+  /* Length of the white portion */
+  height: 2.5px;
+  /* Match border thickness */
+  background-color: white;
+  /* Color to mask the blue */
 }
 
 
-.footerSection{
+.footerSection {
   background-image: url("../../assets/cloudsLanding.png");
   background-position: top center;
   background-repeat: no-repeat;
   background-size: contain;
 }
 
-.footerText{
+.footerText {
   bottom: 20px;
 }
 
 #what-we-serve {
-    scroll-margin-top: 80px;
+  scroll-margin-top: 80px;
+}
+
+.landing-layout {
+  min-height: 100vh;
+
+  background-image:
+    linear-gradient(to right, rgba(200, 200, 200, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(200, 200, 200, 0.3) 1px, transparent 1px);
+
+  background-size: 100px 100px;
+  background-color: var(--landing-bg);
+
+  overflow-x: hidden;
 }

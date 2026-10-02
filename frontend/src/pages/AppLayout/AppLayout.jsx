@@ -4,12 +4,16 @@ import { Outlet } from 'react-router-dom'
 
 const AppLayout = () => {
   return (
-    <div>
-      <div className='fixed top-0 z-100'>
+    <div className="min-h-screen w-full bg-default-bg flex flex-col">
 
-        <AppNavbar/>
+      <div className="fixed top-0 z-100 w-full">
+        <AppNavbar />
       </div>
-        <Outlet/>
+
+      <main className="flex-1">
+        <Outlet />
+      </main>
+
     </div>
   )
 }
