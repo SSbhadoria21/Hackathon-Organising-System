@@ -45,7 +45,7 @@
 
 import axios from "axios";
 import store from "../store/store";
-import { logout } from "../store/authSlice";
+import { storeLogout } from "../store/authSlice";
 
 const api = axios.create({
     baseURL: "http://localhost:3000/api",
@@ -67,8 +67,9 @@ api.interceptors.response.use(
                 return api(error.config);
 
             } catch (refreshError) {
-                store.dispatch(logout());
-                window.location.href = "/login";
+                store.dispatch(storeLogout());
+                // window.location.href = "/login";
+                return Promise.reject(refreshError);
             }
         }
 

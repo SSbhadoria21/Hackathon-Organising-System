@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { ProtectedRoute } from './components/componentsIndex.js'
+import { Provider } from 'react-redux'
 import {
   LandingLayout,
   Landing,
@@ -17,6 +19,7 @@ import {
   Reminders,
   Achievers
 } from './pages/pagesIndex.js'
+import store from './store/store.js'
 
 const router = createBrowserRouter([
   {
@@ -24,52 +27,57 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        element: <LandingLayout/>,
-        children:[
+        element: <LandingLayout />,
+        children: [
           {
             path: "/",
-            element: <Landing/>
+            element: <Landing />
           },
           {
             path: "/signup",
-            element: <Signup/>
+            element: <Signup />
           },
           {
             path: "/verify-email",
-            element: <EmailVerification/>
+            element: <EmailVerification />
           },
           {
             path: "/login",
-            element: <Login/>
+            element: <Login />
           },
           {
             path: "/developers",
-            element:<Developers/>
+            element: <Developers />
           }
         ]
       },
       {
         element: <AppLayout />,
-        children:[
+        children: [
           {
             path: "/home",
-            element: <Home/>
-          },
-          {
-            path: "/create-hackathon",
-            element: <CreateHackathon/>
-          },
-          {
-            path: "/my-teams",
-            element: <MyTeams/>
-          },
-          {
-            path: "/reminders",
-            element: <Reminders/>
+            element: <Home />
           },
           {
             path: "/achievers",
-            element: <Achievers/>
+            element: <Achievers />
+          },
+          {
+            element: <ProtectedRoute />,
+            children: [
+              {
+                path: "/create-hackathon",
+                element: <CreateHackathon />
+              },
+              {
+                path: "/my-teams",
+                element: <MyTeams />
+              },
+              {
+                path: "/reminders",
+                element: <Reminders />
+              },
+            ]
           }
         ]
       }
@@ -79,6 +87,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
   </StrictMode>,
 )
