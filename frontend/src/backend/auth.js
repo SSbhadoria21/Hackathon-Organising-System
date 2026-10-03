@@ -141,9 +141,9 @@ class AuthService {
         return data;
     }
 
-    async loginAccount({ username, password }) {
+    async loginAccount({ identifier, password }) {
         const { data } = await api.post("/auth/login", {
-            username,
+            identifier,
             password
         });
 
