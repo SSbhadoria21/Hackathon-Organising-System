@@ -36,7 +36,7 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  // Handle normal requests
+ 
   const response = NextResponse.next();
 
   response.headers.set('Access-Control-Allow-Origin', corsOrigin);
