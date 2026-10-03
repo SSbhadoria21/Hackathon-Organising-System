@@ -38,7 +38,7 @@ const LandingNavbar = () => {
         </div>
         <div className='bg-navbar-bg w-12 h-screen pl-2.5 pt-2.5 rounded-br-full absolute top-0 sideBar z-20'>
           <div className='w-7 h-7 rounded-full bg-white profile'>
-
+              
           </div>
 
           <div className='mt-15 sidebarIcons'>
