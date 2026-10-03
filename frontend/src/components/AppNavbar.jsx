@@ -48,7 +48,7 @@ const LandingNavbar = () => {
               <RadioTower size={18} className="text-icon-gray group-hover:text-darker-blue transition-colors duration-200" onClick={() => navigate("/create-hackathon")} />
 
               <div className="absolute top-full left-1/2 -translate-x-1 mt-1.5 hidden group-hover:block whitespace-nowrap bg-light-green text-dark-green text-[10px] px-2 py-1 rounded-full shadow-md shadow-black/15 z-50 font-alef">
-                Create Hackathon
+                Create Hackathon  
               </div>
 
             </div>

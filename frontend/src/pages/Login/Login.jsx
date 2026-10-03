@@ -90,6 +90,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
 import { useForm } from 'react-hook-form';
 import authService from '../../backend/auth';
+import { storeLogin } from '../../store/authSlice';
 
 const Login = () => {
     const {
@@ -101,12 +102,15 @@ const Login = () => {
     const navigate = useNavigate()
     const [error, setError] = useState("")
     const [showPassword, setShowPassword] = useState(false);
+    const dispatch = useDispatch()
 
     const submitFunc = async (data) => {
         setError("")
         try {
-            const userData = await authService.loginAccount(data)
-            if (userData) {
+            const session = await authService.loginAccount(data)
+            if (session) {
+                const userData = await authService.getCurrentUser()
+                if(userData) dispatch(storeLogin(userData))
                 navigate('/home')
             }
         } catch (err) {
