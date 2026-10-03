@@ -10,6 +10,7 @@ import Rounds from "./Rounds.jsx"
 import PrizesSponsors from "./PrizesSponsors.jsx"
 import Payments from "./Payments.jsx"
 import Judges from "./Judges.jsx"
+import FormStepper from "./FormStepper.jsx"
 
 export {
     Button,
@@ -23,5 +24,6 @@ export {
     Rounds,
     PrizesSponsors,
     Payments,
-    Judges
+    Judges,
+    FormStepper
 }
