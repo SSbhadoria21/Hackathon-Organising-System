@@ -9,7 +9,7 @@ const CreateHackathon = () => {
   return (
     <div className='p-15 pl-20'>
       <div className='font-space'>
-        <h1 className='text-2xl'>Start Creating a New Hackathon</h1>
+        <h1 className='text-3xl font-bold'>Start Creating a New Hackathon</h1>
         <h1 className='text-sm text-gray-600'>Start filling out the form and save as draft anytime!</h1>
       </div>
       

@@ -4,7 +4,7 @@ import logo from '../assets/logo.png'
 import { Button, Input } from '../components/componentsIndex.js'
 import { NavLink } from "react-router-dom"
 import { useNavigate } from 'react-router-dom'
-import { RadioTower, Pencil, Goal, UserStar, UserRoundGroup, Bell, Quote } from 'lucide-react';
+import { RadioTower, Pencil, Goal, UserStar, UserRoundGroup, Bell, Quote, CircleUserRound } from 'lucide-react';
 
 const LandingNavbar = () => {
 
@@ -37,8 +37,8 @@ const LandingNavbar = () => {
           </div>
         </div>
         <div className='bg-navbar-bg w-12 h-screen pl-2.5 pt-2.5 rounded-br-full absolute top-0 sideBar z-20'>
-          <div className='w-7 h-7 rounded-full bg-white profile'>
-              
+          <div className='w-7 h-7 rounded-full bg-white profile flex justify-center items-center'>
+              <CircleUserRound size={20} color="#9d9d9d" strokeWidth={2} />
           </div>
 
           <div className='mt-15 sidebarIcons'>
