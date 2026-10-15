@@ -17,7 +17,8 @@ import {
   Developers,
   MyTeams,
   Reminders,
-  Achievers
+  Achievers,
+  Profile
 } from './pages/pagesIndex.js'
 import store from './store/store.js'
 
@@ -77,6 +78,10 @@ const router = createBrowserRouter([
                 path: "/reminders",
                 element: <Reminders />
               },
+              {
+                path: "/profile",
+                element:<Profile/>
+              }
             ]
           }
         ]

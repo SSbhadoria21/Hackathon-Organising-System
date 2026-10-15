@@ -10,6 +10,7 @@ const LandingNavbar = () => {
 
   const navigate = useNavigate()
   const [activityOpen, setActivityOpen] = useState(false)
+  const [profileMenu, setProfileMenu] = useState(false)
 
   return (
     <>
@@ -37,7 +38,7 @@ const LandingNavbar = () => {
           </div>
         </div>
         <div className='bg-navbar-bg w-12 h-screen pl-2.5 pt-2.5 rounded-br-full absolute top-0 sideBar z-20'>
-          <div className='w-7 h-7 rounded-full bg-white profile flex justify-center items-center'>
+          <div className='w-7 h-7 rounded-full bg-white profile flex justify-center items-center' onClick={()=>navigate('/profile')}>
               <CircleUserRound size={20} color="#9d9d9d" strokeWidth={2} />
           </div>
 
