@@ -7,6 +7,7 @@ export const updateProfileSchema = z.object({
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   skills: z.array(z.string().trim().min(1)).max(30).optional(),
   collegeOrCompany: z.string().max(120).optional(),
+  avatar: z.string().url('Invalid Avatar URL').or(z.literal('')).optional(),
   githubUrl: z.string().url('Invalid GitHub URL').or(z.literal('')).optional(),
   linkedinUrl: z.string().url('Invalid LinkedIn URL').or(z.literal('')).optional(),
   portfolioUrl: z.string().url('Invalid Portfolio URL').or(z.literal('')).optional(),

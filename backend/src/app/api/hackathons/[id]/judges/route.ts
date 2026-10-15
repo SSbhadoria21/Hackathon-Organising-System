@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import dbConnect from '@/lib/mongodb';
 import { Hackathon } from '@/models/Hackathon';
 import { Judge } from '@/models/Judge';
+import { Round } from '@/models/Round';
 import { User } from '@/models/User';
 import { Notification } from '@/models/Notification';
 import { requireAuth } from '@/lib/withAuth';
@@ -23,6 +24,7 @@ export async function GET(
     await dbConnect();
     const judges = await Judge.find({ hackathonId: id })
       .populate('userId', 'username fullName avatar bio skills')
+      .populate('roundIds', 'roundName roundNumber roundType')
       .lean();
 
     return successResponse(judges, 'Judges fetched');
@@ -65,7 +67,35 @@ export async function POST(
       );
     }
 
-    const { targetUsername, email, name, roundIds } = parsed.data;
+    const { targetUsername, email, name, accessType = 'FULL', roundIds } = parsed.data;
+
+    // Resolve which rounds are granted
+    let finalRoundIds: mongoose.Types.ObjectId[] = [];
+    let roundNames: string[] = [];
+
+    const allHackathonRounds = await Round.find({ hackathonId: id }).select('_id roundName roundNumber').lean();
+
+    if (accessType === 'SPECIFIC_ROUNDS' && roundIds && roundIds.length > 0) {
+      const validRounds = allHackathonRounds.filter((r) =>
+        roundIds.includes(r._id.toString())
+      );
+
+      if (validRounds.length === 0) {
+        return errorResponse('Selected rounds do not belong to this hackathon', 400);
+      }
+
+      finalRoundIds = validRounds.map((r) => r._id as mongoose.Types.ObjectId);
+      roundNames = validRounds.map((r) => `Round ${r.roundNumber}: ${r.roundName}`);
+    } else {
+      // FULL access to all submissions across all rounds
+      finalRoundIds = allHackathonRounds.map((r) => r._id as mongoose.Types.ObjectId);
+      roundNames = allHackathonRounds.map((r) => `Round ${r.roundNumber}: ${r.roundName}`);
+    }
+
+    const accessDescription =
+      accessType === 'FULL'
+        ? 'Full access (all rounds and submissions)'
+        : `Specific round(s): ${roundNames.join(', ')}`;
 
     if (targetUsername) {
       const cleanUsername = targetUsername.trim().replace(/^@/, '').toLowerCase();
@@ -98,14 +128,15 @@ export async function POST(
         userId: targetUser._id,
         invitedBy: auth._id,
         status: 'INVITED',
-        roundIds: roundIds ? roundIds.map((r: string) => new mongoose.Types.ObjectId(r)) : hackathon.roundIds,
+        accessType,
+        roundIds: finalRoundIds,
       });
 
       await Notification.create({
         userId: targetUser._id,
         type: 'JUDGE_INVITE',
         title: 'Judge Invitation Request',
-        message: `${organizer?.fullName || 'An organizer'} invited you to be a judge for "${hackathon.eventName}"`,
+        message: `${organizer?.fullName || 'An organizer'} invited you to be a judge for "${hackathon.eventName}" with ${accessDescription}`,
         actionStatus: 'PENDING',
         read: false,
         metadata: {
@@ -113,11 +144,19 @@ export async function POST(
           hackathonName: hackathon.eventName || 'Hackathon',
           organizerName: organizer?.fullName || 'Organizer',
           judgeId: judge._id.toString(),
+          accessType,
+          roundIds: JSON.stringify(finalRoundIds.map(String)),
+          roundNames: JSON.stringify(roundNames),
         },
       });
 
+      const populatedJudge = await Judge.findById(judge._id)
+        .populate('userId', 'username fullName avatar bio skills')
+        .populate('roundIds', 'roundName roundNumber roundType')
+        .lean();
+
       return successResponse(
-        judge,
+        populatedJudge,
         `Invitation sent to @${cleanUsername}`,
         201
       );
@@ -141,13 +180,42 @@ export async function POST(
         email: cleanEmail,
         invitedBy: auth._id,
         status: 'INVITED',
+        accessType,
+        roundIds: finalRoundIds,
         magicLinkToken,
         magicLinkExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        roundIds: roundIds ? roundIds.map((r: string) => new mongoose.Types.ObjectId(r)) : hackathon.roundIds,
       });
 
+      // If user with this email exists in system, send internal notification too
+      const existingUser = await User.findOne({ email: cleanEmail });
+      if (existingUser) {
+        const organizer = await User.findById(auth._id).select('fullName');
+        await Notification.create({
+          userId: existingUser._id,
+          type: 'JUDGE_INVITE',
+          title: 'Judge Invitation Request',
+          message: `${organizer?.fullName || 'An organizer'} invited you to be a judge for "${hackathon.eventName}" with ${accessDescription}`,
+          actionStatus: 'PENDING',
+          read: false,
+          metadata: {
+            hackathonId: hackathon._id.toString(),
+            hackathonName: hackathon.eventName || 'Hackathon',
+            organizerName: organizer?.fullName || 'Organizer',
+            judgeId: judge._id.toString(),
+            accessType,
+            roundIds: JSON.stringify(finalRoundIds.map(String)),
+            roundNames: JSON.stringify(roundNames),
+          },
+        });
+      }
+
+      const populatedJudge = await Judge.findById(judge._id)
+        .populate('userId', 'username fullName avatar bio skills')
+        .populate('roundIds', 'roundName roundNumber roundType')
+        .lean();
+
       return successResponse(
-        judge,
+        populatedJudge,
         `Invitation sent to ${cleanEmail}`,
         201
       );

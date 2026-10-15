@@ -111,10 +111,28 @@ export const judgeInviteSchema = z.object({
   targetUsername: z.string().min(1).optional(),
   email: z.string().email().optional(),
   name: z.string().min(1).optional(),
+  accessType: z.enum(['FULL', 'SPECIFIC_ROUNDS']).default('FULL'),
   roundIds: z.array(z.string()).optional(),
 }).refine((data) => data.targetUsername || data.email, {
   message: 'Either username or email is required to invite a judge',
   path: ['targetUsername'],
+}).refine(
+  (data) => {
+    if (data.accessType === 'SPECIFIC_ROUNDS') {
+      return Array.isArray(data.roundIds) && data.roundIds.length > 0;
+    }
+    return true;
+  },
+  {
+    message: 'At least one round must be selected when specifying round access',
+    path: ['roundIds'],
+  }
+);
+
+export const judgeUpdateSchema = z.object({
+  accessType: z.enum(['FULL', 'SPECIFIC_ROUNDS']).optional(),
+  roundIds: z.array(z.string()).optional(),
+  status: z.enum(['INVITED', 'ACCEPTED', 'DECLINED']).optional(),
 });
 
 export const fullPublishHackathonSchema = z.object({

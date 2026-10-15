@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 export interface IJudge extends Document {
   hackathonId: Types.ObjectId;
   roundIds: Types.ObjectId[];        
+  accessType: 'FULL' | 'SPECIFIC_ROUNDS';
 
   name: string;
   email: string;
@@ -27,6 +28,11 @@ const JudgeSchema: Schema<IJudge> = new Schema(
   {
     hackathonId:{ type: Schema.Types.ObjectId, ref: 'Hackathon', required: true },
     roundIds:[{ type: Schema.Types.ObjectId, ref: 'Round' }],
+    accessType: {
+      type: String,
+      enum: ['FULL', 'SPECIFIC_ROUNDS'],
+      default: 'FULL',
+    },
     name: { type: String, required: true, trim: true },
     email:  { type: String, required: true, lowercase: true, trim: true },
     username:{ type: String, lowercase: true, trim: true },
