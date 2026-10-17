@@ -5,12 +5,23 @@ import { Button, Input } from '../components/componentsIndex.js'
 import { NavLink } from "react-router-dom"
 import { useNavigate } from 'react-router-dom'
 import { RadioTower, Pencil, Goal, UserStar, UserRoundGroup, Bell, Quote, CircleUserRound } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux'
+import authService from '../backend/auth.js'
+import { storeLogout } from '../store/authSlice.js'
 
 const LandingNavbar = () => {
 
   const navigate = useNavigate()
   const [activityOpen, setActivityOpen] = useState(false)
   const [profileMenu, setProfileMenu] = useState(false)
+  const userData = useSelector((state) => state.auth.userData?.data)
+  const loginStatus = useSelector((state)=>state.auth.status)
+  const dispatch = useDispatch()
+
+  const logoutFunc = async()=>{
+    await authService.logoutAccount()
+    dispatch(storeLogout())
+  }
 
   return (
     <>
@@ -38,8 +49,58 @@ const LandingNavbar = () => {
           </div>
         </div>
         <div className='bg-navbar-bg w-12 h-screen pl-2.5 pt-2.5 rounded-br-full absolute top-0 sideBar z-20'>
-          <div className='w-7 h-7 rounded-full bg-white profile flex justify-center items-center' onClick={()=>navigate('/profile')}>
+          {/* <div className='w-7 h-7 rounded-full bg-white profile flex justify-center items-center' onClick={()=>navigate('/profile')}>
               <CircleUserRound size={20} color="#9d9d9d" strokeWidth={2} />
+          </div> */}
+
+
+          <div className="relative group ProfileIcon">
+            {/* Profile Icon */}
+            <div
+              className="w-7 h-7 rounded-full border-2 border-darker-blue bg-white profile flex justify-center items-center overflow-hidden cursor-pointer"
+              onClick={() => navigate('/profile')}
+            >
+              {userData?.avatar ? (
+                <img
+                  src={userData.avatar}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <CircleUserRound size={20} color="#9d9d9d" strokeWidth={2} />
+              )}
+            </div>
+
+            {/* Hover Popup */}
+            <div
+              className="absolute left-0 top-full mt-0 w-40
+    bg-white rounded-xl shadow-lg border border-gray-200
+    p-1 z-50
+    opacity-0 invisible translate-y-2
+    group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
+    transition-all duration-200 ease-out font-alef"
+            >
+              <button
+                onClick={() => navigate('/profile')}
+                className="w-full text-left px-2 py-1 rounded-lg text-[11px] text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                View Profile
+              </button>
+
+              <button
+                onClick={() => navigate('/edit-profile')}
+                className="w-full text-left px-2 py-1 rounded-lg text-[11px] text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Edit Profile
+              </button>
+
+              <button
+                onClick={logoutFunc}
+                className="w-full text-left px-2 py-1 rounded-lg text-[11px] text-red-500 hover:bg-red-50 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
           </div>
 
           <div className='mt-15 sidebarIcons'>
@@ -49,7 +110,7 @@ const LandingNavbar = () => {
               <RadioTower size={18} className="text-icon-gray group-hover:text-darker-blue transition-colors duration-200" onClick={() => navigate("/create-hackathon")} />
 
               <div className="absolute top-full left-1/2 -translate-x-1 mt-1.5 hidden group-hover:block whitespace-nowrap bg-light-green text-dark-green text-[10px] px-2 py-1 rounded-full shadow-md shadow-black/15 z-50 font-alef">
-                Create Hackathon  
+                Create Hackathon
               </div>
 
             </div>

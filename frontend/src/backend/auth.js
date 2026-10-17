@@ -161,6 +161,18 @@ class AuthService {
 
         return data;
     }
+
+    async getFullProfile(){
+        const {data} = await api.get("/users/profile");
+
+        return data;
+    }
+
+    // async editProfile({}){
+    //     const {data} = await api.patch("/users/profile");
+
+    //     return data;
+    // }
 }
 
 const authService = new AuthService();

@@ -11,6 +11,7 @@ import MyTeams from './MyTeams/MyTeams.jsx'
 import Reminders from './Reminders/Reminders.jsx'
 import Achievers from './Achievers/Achievers.jsx'
 import Profile from './Profile/Profile.jsx'
+import EditProfile from './EditProfile/EditProfile.jsx'
 
 export {
     Home,
@@ -26,4 +27,5 @@ export {
     Reminders,
     Achievers,
     Profile,
+    EditProfile,
 }
