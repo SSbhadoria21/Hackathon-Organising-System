@@ -12,11 +12,13 @@ const authSlice = createSlice({
         storeLogin: (state, action)=>{
             state.status = true
             state.userData = action.payload
+            localStorage.setItem('hasSession', 'true')
         },
         
         storeLogout: (state)=>{
             state.status = false
             state.userData = null
+            localStorage.removeItem('hasSession')
         }
     }
 });

@@ -30,8 +30,16 @@ const Signup = () => {
                 })
             }
 
-        } catch (error) {
-            setError(error.message)
+        } catch (err) {
+            const serverMessage = err.response?.data?.message || err.message || "Failed to create account";
+            setError(serverMessage);
+            if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+                err.response.data.errors.forEach(({ field, message }) => {
+                    if (field) {
+                        setFieldError(field, { type: 'server', message });
+                    }
+                });
+            }
         }
     }
 
@@ -101,7 +109,15 @@ const Signup = () => {
 
                         <div className='flex flex-col'>
                             <label htmlFor="username" className='font-pop text-darker-blue'>Username</label>
-                            <input id='username' type="text" placeholder='username' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("username", { required: "Username is required", minLength: {value: 3, message:"Must be at least 3 characters"} })} />
+                            <input id='username' type="text" placeholder='username' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("username", { 
+                                required: "Username is required", 
+                                minLength: { value: 3, message: "Must be at least 3 characters" },
+                                maxLength: { value: 30, message: "Cannot exceed 30 characters" },
+                                pattern: {
+                                    value: /^[a-zA-Z0-9_]+$/,
+                                    message: "Letters, numbers & underscores only"
+                                }
+                            })} />
                             {errors.username && <p className='text-red-500 text-xs mt-1 absolute top-48 right-0 font-space'>{errors.username.message}</p>}
                         </div>
 
@@ -110,6 +126,10 @@ const Signup = () => {
                             <input id='fullName' type="text" placeholder='What should we call you?' className='placeholder:text-xs placeholder:italic placeholder:font-space bg-white rounded-full px-3 font-space text-xs py-2 w-70 shadow-md shadow-black/40 focus:outline-none focus:bg-[#f1f6e6]' {...register("fullName", { required: "Full Name is required" })} />
                             {errors.fullName && <p className='text-red-500 text-xs mt-1 absolute top-72 right-0 font-space'>{errors.fullName.message}</p>}
                         </div>
+
+                        {error && (
+                            <p className='text-red-500 text-xs font-space text-center max-w-70'>{error}</p>
+                        )}
 
                         <div className='flex items-center justify-center mt-2'>
                             <Button type='submit' text={isSubmitting ? 'Creating account...' : 'Submit'} className='font-extrabold' textsize='text-xl' px='px-9' rounded='rounded-full' disabled={isSubmitting} />

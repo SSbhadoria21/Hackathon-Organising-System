@@ -6,23 +6,28 @@ import { storeLogin, storeLogout } from './store/authSlice'
 
 const App = () => {
   const [loading, setLoading] = useState(true)
-  const disptach = useDispatch()
+  const dispatch = useDispatch()
 
   useEffect(() => {
+    if (!localStorage.getItem('hasSession')) {
+      setLoading(false)
+      return
+    }
+
     authService.getCurrentUser()
       .then((userData) => {
         if (userData) {
-          disptach(storeLogin(userData))
+          dispatch(storeLogin(userData))
         }
         else {
-          disptach(storeLogout())
+          dispatch(storeLogout())
         }
       })
       .catch(() => {
         dispatch(storeLogout())
       })
       .finally(() => setLoading(false))
-  }, [disptach])
+  }, [dispatch])
 
 
   return !loading ? (

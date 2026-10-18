@@ -158,7 +158,7 @@ class AuthService {
 
     async logoutAccount() {
         const { data } = await api.post("/auth/logout");
-
+        localStorage.removeItem('hasSession');
         return data;
     }
 

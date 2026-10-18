@@ -5,9 +5,10 @@ export const registerSchema = z.object({
     .string()
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username cannot exceed 30 characters')
-    .regex(/^[a-z0-9_]+$/, 'Username can only have letters, numbers and underscores'),
-  fullName: z.string().min(2, 'Full name must be at least 2 characters').max(80),
-  email: z.string().email('Invalid email'),
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only have letters, numbers and underscores')
+    .transform((val) => val.toLowerCase()),
+  fullName: z.string().min(2, 'Full name must be at least 2 characters').max(80).trim(),
+  email: z.string().email('Invalid email').transform((val) => val.toLowerCase().trim()),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')

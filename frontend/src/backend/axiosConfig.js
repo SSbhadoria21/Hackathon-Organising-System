@@ -56,19 +56,27 @@ api.interceptors.response.use(
     (response) => response,
 
     async (error) => {
-        if (error.response?.status === 401) {
+        const originalRequest = error.config;
+        if (
+            error.response?.status === 401 &&
+            originalRequest &&
+            !originalRequest._retry &&
+            localStorage.getItem('hasSession') &&
+            !originalRequest.url?.includes("/auth/refresh") &&
+            !originalRequest.url?.includes("/auth/login")
+        ) {
+            originalRequest._retry = true;
             try {
                 await axios.post(
-                    "http://localhost:3000/api/auth/refresh-token",
+                    "http://localhost:3000/api/auth/refresh",
                     {},
                     { withCredentials: true }
                 );
 
-                return api(error.config);
+                return api(originalRequest);
 
             } catch (refreshError) {
                 store.dispatch(storeLogout());
-                // window.location.href = "/login";
                 return Promise.reject(refreshError);
             }
         }

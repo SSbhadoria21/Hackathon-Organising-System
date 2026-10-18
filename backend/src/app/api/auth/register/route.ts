@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
+      console.warn('Register validation failed:', parsed.error.issues);
       return errorResponse(
         'Validation failed',
         400,
