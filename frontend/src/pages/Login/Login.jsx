@@ -87,10 +87,10 @@ import React, { useState } from 'react'
 import signupPeople from '../../assets/loginPeople.png'
 import './Login.css';
 import { Link, useNavigate } from 'react-router-dom';
-import Button from '../../components/Button';
+import Button from '../../components/Button.jsx';
 import { useForm } from 'react-hook-form';
-import authService from '../../backend/auth';
-import { storeLogin } from '../../store/authSlice';
+import authService from '../../backend/auth.js';
+import { storeLogin } from '../../store/authSlice.js';
 import { useDispatch } from 'react-redux';
 
 const Login = () => {
