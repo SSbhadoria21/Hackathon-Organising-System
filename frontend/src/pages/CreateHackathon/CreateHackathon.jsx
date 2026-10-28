@@ -107,8 +107,8 @@ const CreateHackathon = () => {
         if (!cancelled) {
           setError(
             err.response?.data?.message ||
-              err.message ||
-              "Could not initialize the draft."
+            err.message ||
+            "Could not initialize the draft."
           );
         }
       } finally {
@@ -189,13 +189,57 @@ const CreateHackathon = () => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          err.message ||
-          "Could not upload or save Basic Details."
+        err.message ||
+        "Could not upload or save Basic Details."
       );
     } finally {
       setSaving(false);
     }
   };
+
+
+
+  const handleTimelineNext = async (values) => {
+    if (!draftId) {
+      setError("Draft is not ready. Please try again.");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const payload = {
+        registrationOpens: values.registrationOpens,
+        registrationCloses: values.registrationCloses,
+        hackingStartsAt: values.hackingStartsAt,
+        hackingEndsAt: values.hackingEndsAt,
+        resultAnnouncementDate: values.resultAnnouncementDate,
+        timeZone: values.timeZone.trim(),
+      };
+
+      await hackathonService.saveDraftStep(
+        draftId,
+        "TIMELINE",
+        payload
+      );
+
+      setDraftData((previous) => ({
+        ...previous,
+        ...payload,
+      }));
+
+      setCurrentStep(2);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Could not save the timeline. Please try again."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   if (loading) {
     return <div className="p-15 pl-20">Loading your draft...</div>;
@@ -247,7 +291,16 @@ const CreateHackathon = () => {
               />
             )}
 
-            {currentStep === 1 && <TimeLine />}
+
+            {currentStep === 1 && (
+              <TimeLine
+                initialData={draftData}
+                onNext={handleTimelineNext}
+                onBack={() => setCurrentStep(0)}
+                saving={saving}
+              />
+            )}
+
             {currentStep === 2 && <Rules />}
             {currentStep === 3 && <Rounds />}
             {currentStep === 4 && <PrizesSponsors />}
