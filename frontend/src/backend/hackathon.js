@@ -1,4 +1,3 @@
-
 import api from "./axiosConfig.js";
 
 class HackathonService {
@@ -25,9 +24,12 @@ class HackathonService {
     return data;
   }
 
-  async uploadFile(file) {
+  async uploadFile(file, folder = "general") {
     const formData = new FormData();
     formData.append("file", file);
+    if (folder) {
+      formData.append("folder", folder);
+    }
 
     const { data } = await api.post("/upload", formData);
     return data;
@@ -35,6 +37,31 @@ class HackathonService {
 
   async deleteDraft(id) {
     const { data } = await api.delete(`/hackathons/draft/${id}`);
+    return data;
+  }
+
+  async publishHackathon(id) {
+    const { data } = await api.post(`/hackathons/draft/${id}/publish`);
+    return data;
+  }
+
+  async getDraftPreview(id) {
+    const { data } = await api.get(`/hackathons/draft/${id}/preview`);
+    return data;
+  }
+
+  async getJudges(id) {
+    const { data } = await api.get(`/hackathons/${id}/judges`);
+    return data;
+  }
+
+  async inviteJudge(id, judgeData) {
+    const { data } = await api.post(`/hackathons/${id}/judges`, judgeData);
+    return data;
+  }
+
+  async removeJudge(id, judgeId) {
+    const { data } = await api.delete(`/hackathons/${id}/judges/${judgeId}`);
     return data;
   }
 

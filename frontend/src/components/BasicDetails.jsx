@@ -134,15 +134,20 @@ const BasicDetails = ({
 
       <div className="mb-5">
         <label className="mb-2 block text-sm font-medium">
-          Banner
+          Banner Image <span className="text-red-500">*</span>
         </label>
 
         {initialData.banner && (
-          <img
-            src={initialData.banner}
-            alt="Current banner"
-            className="mb-3 h-36 w-full rounded-lg object-cover"
-          />
+          <div className="mb-3">
+            <img
+              src={initialData.banner}
+              alt="Current banner"
+              className="h-36 w-full rounded-lg object-cover border border-gray-200"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Banner uploaded. Select a new image if you want to replace it.
+            </p>
+          </div>
         )}
 
         <input
@@ -151,8 +156,8 @@ const BasicDetails = ({
           {...register("banner", {
             validate: (files) =>
               files?.length > 0 ||
-              initialData.banner ||
-              "Banner is required",
+              Boolean(initialData.banner) ||
+              "Banner image is required",
           })}
           className={inputClass}
         />
@@ -166,34 +171,28 @@ const BasicDetails = ({
 
       <div className="mb-5">
         <label className="mb-2 block text-sm font-medium">
-          Logo
+          Logo <span className="text-xs text-gray-500 font-normal">(Optional)</span>
         </label>
 
         {initialData.logo && (
-          <img
-            src={initialData.logo}
-            alt="Current logo"
-            className="mb-3 h-24 w-24 rounded-lg object-cover"
-          />
+          <div className="mb-3">
+            <img
+              src={initialData.logo}
+              alt="Current logo"
+              className="h-20 w-20 rounded-lg object-cover border border-gray-200"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Logo uploaded. Select a new image to replace.
+            </p>
+          </div>
         )}
 
         <input
           type="file"
           accept="image/*"
-          {...register("logo", {
-            validate: (files) =>
-              files?.length > 0 ||
-              initialData.logo ||
-              "Logo is required",
-          })}
+          {...register("logo")}
           className={inputClass}
         />
-
-        {errors.logo && (
-          <p className="mt-1 text-sm text-red-500">
-            {errors.logo.message}
-          </p>
-        )}
       </div>
 
       {(mode === "hybrid" || mode === "offline") && (
