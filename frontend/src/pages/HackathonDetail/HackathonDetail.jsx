@@ -28,6 +28,7 @@ import {
   Radio,
 } from 'lucide-react';
 import hackathonService from '../../backend/hackathon.js';
+import { RegistrationModal } from '../../components/componentsIndex.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -238,6 +239,7 @@ const HackathonDetail = () => {
   const [registering, setRegistering] = useState(false);
   const [copied, setCopied] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [isRegModalOpen, setIsRegModalOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -278,26 +280,28 @@ const HackathonDetail = () => {
     };
   }, [id]);
 
-  const handleRegister = async () => {
-    if (!hackathon) return;
-    const hackathonId = hackathon._id || id;
-    setRegistering(true);
-    try {
-      await hackathonService.registerHackathon(hackathonId);
-      setHackathon((prev) => ({
-        ...prev,
-        isUserRegistered: true,
-        userRegistration: { isRegistered: true },
-        registeredTeamsCount: (prev.registeredTeamsCount || 0) + 1,
-      }));
-      setToastMessage('Successfully registered for this hackathon! 🎉');
-      setTimeout(() => setToastMessage(''), 4000);
-    } catch (err) {
-      const msg = err?.response?.data?.message || 'Registration failed. Please try again.';
-      alert(msg);
-    } finally {
-      setRegistering(false);
+  const handleRegisterClick = () => {
+    const isReg = hackathon?.isUserRegistered || hackathon?.userRegistration?.isRegistered;
+    if (isReg) {
+      navigate(`/hackathon/${hackathon?._id || id}/participate`);
+      return;
     }
+    setIsRegModalOpen(true);
+  };
+
+  const handleRegistrationSuccess = (regData) => {
+    setHackathon((prev) => ({
+      ...prev,
+      isUserRegistered: true,
+      userRegistration: {
+        isRegistered: true,
+        teamId: regData?.teamId,
+        teamName: regData?.teamName || regData?.team?.name,
+      },
+      registeredTeamsCount: (prev?.registeredTeamsCount || 0) + 1,
+    }));
+    setToastMessage('Successfully registered for this hackathon! 🎉');
+    setTimeout(() => setToastMessage(''), 4000);
   };
 
   const handleCopyLink = () => {
@@ -444,20 +448,17 @@ const HackathonDetail = () => {
 
                 <button
                   type="button"
-                  onClick={handleRegister}
-                  disabled={isRegistered || registering}
+                  onClick={handleRegisterClick}
                   className={`px-6 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5
                     ${isRegistered
-                      ? 'bg-emerald-500 text-white cursor-default'
+                      ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
                       : 'bg-white text-darker-blue hover:bg-slate-100 active:scale-95'
                     }`}
                 >
                   {isRegistered ? (
                     <>
-                      <CheckCircle2 size={15} /> Registered
+                      <CheckCircle2 size={15} /> Participant Hub →
                     </>
-                  ) : registering ? (
-                    'Registering…'
                   ) : (
                     <>
                       Register for Free <ChevronRight size={14} />
@@ -904,20 +905,17 @@ const HackathonDetail = () => {
               {/* Big CTA */}
               <button
                 type="button"
-                onClick={handleRegister}
-                disabled={isRegistered || registering}
+                onClick={handleRegisterClick}
                 className={`w-full py-3.5 rounded-2xl font-bold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 mb-3
                   ${isRegistered
-                    ? 'bg-emerald-600 text-white cursor-default'
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                     : 'bg-darker-blue text-white hover:bg-dark-blue active:scale-98'
                   }`}
               >
                 {isRegistered ? (
                   <>
-                    <CheckCircle2 size={16} /> Already Registered
+                    <CheckCircle2 size={16} /> Open Participant Hub →
                   </>
-                ) : registering ? (
-                  'Registering…'
                 ) : (
                   <>
                     Register for Free <ChevronRight size={16} />
@@ -928,7 +926,7 @@ const HackathonDetail = () => {
               <p className="text-[11px] text-center text-gray-500 font-alef mb-5">
                 {isRegistered
                   ? 'Your participation is confirmed. Prepare your repositories for Round 1!'
-                  : 'Free entry • Fast 1-click registration for you and your team'}
+                  : 'Free entry • Form a team or join with an invite code'}
               </p>
 
               <hr className="border-gray-100 mb-5" />
@@ -980,6 +978,14 @@ const HackathonDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Registration Modal Form */}
+      <RegistrationModal
+        isOpen={isRegModalOpen}
+        onClose={() => setIsRegModalOpen(false)}
+        hackathon={h}
+        onRegistrationSuccess={handleRegistrationSuccess}
+      />
     </div>
   );
 };

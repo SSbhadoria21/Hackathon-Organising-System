@@ -37,6 +37,8 @@ export async function GET(
     return successResponse(
       {
         ...draft,
+        draftId: draft._id.toString(),
+        rounds: draft.roundIds || [],
         judges,
       },
       'Draft fetched'
@@ -117,12 +119,33 @@ export async function PATCH(
         if (data.teamMinSize !== undefined) draft.teamMinSize = Number(data.teamMinSize);
         if (data.teamMaxSize !== undefined) draft.teamMaxSize = Number(data.teamMaxSize);
         if (data.eligibility !== undefined) draft.eligibility = data.eligibility;
-        if (data.allowedColleges !== undefined) draft.allowedColleges = data.allowedColleges;
+        if (data.allowedColleges !== undefined) {
+          draft.allowedColleges = Array.isArray(data.allowedColleges)
+            ? data.allowedColleges
+            : typeof data.allowedColleges === 'string'
+            ? data.allowedColleges.split(',').map((s: string) => s.trim()).filter(Boolean)
+            : [];
+        }
         if (data.plagiarismPolicyEnabled !== undefined) draft.plagiarismPolicyEnabled = Boolean(data.plagiarismPolicyEnabled);
         if (data.cocDocumentUrl !== undefined) draft.cocDocumentUrl = data.cocDocumentUrl;
-        if (data.techStackRestrictions !== undefined) draft.techStackRestrictions = data.techStackRestrictions;
+        if (data.techStackRestrictions !== undefined) {
+          draft.techStackRestrictions = Array.isArray(data.techStackRestrictions)
+            ? data.techStackRestrictions
+            : typeof data.techStackRestrictions === 'string'
+            ? data.techStackRestrictions.split(',').map((s: string) => s.trim()).filter(Boolean)
+            : [];
+        }
         if (data.problemStatementPdfUrl !== undefined) draft.problemStatementPdfUrl = data.problemStatementPdfUrl;
-        if (data.tracks !== undefined) draft.tracks = data.tracks;
+        if (data.tracks !== undefined) {
+          draft.tracks = Array.isArray(data.tracks)
+            ? data.tracks
+                .filter((t: any) => t && (t.title || t.name))
+                .map((t: any) => ({
+                  title: (t.title || t.name || '').trim(),
+                  description: (t.description || '').trim(),
+                }))
+            : [];
+        }
 
         if (draft.cocDocumentUrl && draft.teamMinSize && draft.teamMaxSize) {
           draft.stepProgress.rulesEligibility = true;
@@ -136,22 +159,42 @@ export async function PATCH(
 
           const createdRounds = await Promise.all(
             data.rounds.map(async (r: any, index: number) => {
+              const criterias = Array.isArray(r.criterias) && r.criterias.length > 0
+                ? r.criterias
+                    .filter((c: any) => c && c.name && c.name.trim())
+                    .map((c: any) => ({
+                      name: c.name.trim(),
+                      weight: Number(c.weight) || 0,
+                      description: (c.description || 'Evaluation criterion').trim(),
+                    }))
+                : [
+                    { name: 'Innovation & Impact', weight: 40, description: 'Novelty of idea' },
+                    { name: 'Technical Execution', weight: 40, description: 'Code quality and architecture' },
+                    { name: 'UI/UX Design', weight: 20, description: 'User experience' },
+                  ];
+
               return Round.create({
                 hackathonId: draft._id,
-                roundName: r.roundName || `Round ${index + 1}`,
-                roundNumber: r.roundNumber || index + 1,
+                roundName: (r.roundName || `Round ${index + 1}`).trim(),
+                roundNumber: Number(r.roundNumber) || index + 1,
                 roundType: r.roundType || 'SUBMISSION',
                 roundOpens: r.roundOpens ? new Date(r.roundOpens) : draft.registrationCloses || new Date(),
                 roundCloses: r.roundCloses ? new Date(r.roundCloses) : draft.resultAnnouncementDate || new Date(),
-                maxTeamsAdvancing: r.maxTeamsAdvancing || 10,
-                aiWeightage: r.aiWeightage !== undefined ? r.aiWeightage : 0.4,
-                scoreThreshold: r.scoreThreshold || 0,
-                criterias: r.criterias || [
-                  { name: 'Innovation & Impact', weight: 40, description: 'Novelty of idea' },
-                  { name: 'Technical Execution', weight: 40, description: 'Code quality and architecture' },
-                  { name: 'UI/UX Design', weight: 20, description: 'User experience' },
-                ],
-                quizQuestions: r.quizQuestions,
+                maxTeamsAdvancing: Number(r.maxTeamsAdvancing) || 10,
+                aiWeightage: r.aiWeightage !== undefined ? Number(r.aiWeightage) : 0.4,
+                scoreThreshold: r.scoreThreshold !== undefined ? Number(r.scoreThreshold) : 0,
+                criterias,
+                quizQuestions: Array.isArray(r.quizQuestions)
+                  ? r.quizQuestions
+                      .filter((q: any) => q && q.question && q.question.trim())
+                      .map((q: any) => ({
+                        question: q.question.trim(),
+                        options: Array.isArray(q.options) ? q.options.map((opt: string) => String(opt).trim()) : [],
+                        correctIndex: Number(q.correctIndex) || 0,
+                        marks: Number(q.marks) || 1,
+                        timeLimitSeconds: q.timeLimitSeconds ? Number(q.timeLimitSeconds) : undefined,
+                      }))
+                  : undefined,
               });
             })
           );
@@ -163,8 +206,31 @@ export async function PATCH(
       }
 
       case 'PRIZES_SPONSORS': {
-        if (data.prizes !== undefined) draft.prizes = data.prizes;
-        if (data.sponsors !== undefined) draft.sponsors = data.sponsors;
+        if (data.prizes !== undefined) {
+          draft.prizes = Array.isArray(data.prizes)
+            ? data.prizes
+                .filter((p: any) => p && p.title && p.title.trim())
+                .map((p: any) => ({
+                  title: p.title.trim(),
+                  amount: Number(p.amount) || 0,
+                  type: ['CASH', 'VOUCHER', 'TROPHY', 'OTHER'].includes(String(p.type || '').toUpperCase())
+                    ? String(p.type).toUpperCase()
+                    : 'CASH',
+                  description: (p.description || '').trim(),
+                }))
+            : [];
+        }
+        if (data.sponsors !== undefined) {
+          draft.sponsors = Array.isArray(data.sponsors)
+            ? data.sponsors
+                .filter((s: any) => s && (s.name || s.logoUrl || s.websiteUrl))
+                .map((s: any) => ({
+                  name: (s.name || 'Sponsor').trim(),
+                  logoUrl: (s.logoUrl || '').trim(),
+                  websiteUrl: (s.websiteUrl || '').trim(),
+                }))
+            : [];
+        }
         draft.stepProgress.prizesSponsors = true;
         break;
       }
@@ -198,6 +264,8 @@ export async function PATCH(
     return successResponse(
       {
         ...populatedDraft,
+        draftId: draft._id.toString(),
+        rounds: populatedDraft?.roundIds || [],
         judges,
       },
       `Step ${step} saved`

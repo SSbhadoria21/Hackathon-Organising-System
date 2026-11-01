@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import { Hackathon } from '@/models/Hackathon';
+import { Judge } from '@/models/Judge';
 import { requireAuth } from '@/lib/withAuth';
 import { successResponse, errorResponse } from '@/utils/ApiResponse';
 
@@ -15,11 +16,14 @@ export async function GET(req: NextRequest) {
       status: 'DRAFT',
     })
       .sort({ updatedAt: -1 })
+      .populate('roundIds')
       .lean();
 
     if (!draft) {
       return successResponse(null, 'No active draft found');
     }
+
+    const judges = await Judge.find({ hackathonId: draft._id }).lean();
 
     const sp = draft.stepProgress || {
       basicDetails: false,
@@ -36,14 +40,12 @@ export async function GET(req: NextRequest) {
 
     return successResponse(
       {
+        ...draft,
         draftId: draft._id.toString(),
-        eventName: draft.eventName || 'Untitled Hackathon',
-        theme: draft.theme || '',
-        banner: draft.banner || '',
-        currentStep: draft.currentStep || 'BASIC_DETAILS',
+        rounds: draft.roundIds || [],
+        judges: judges || [],
         stepProgress: sp,
         progressPercent,
-        updatedAt: draft.updatedAt,
       },
       'Latest draft fetched'
     );

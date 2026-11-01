@@ -47,3 +47,21 @@ export async function GET(req: NextRequest) {
     return errorResponse('Something went wrong', 500);
   }
 }
+
+export async function PATCH(req: NextRequest) {
+  try {
+    await dbConnect();
+    const auth = requireAuth(req);
+    if (auth instanceof Response) return auth;
+
+    await Notification.updateMany(
+      { userId: auth._id, read: false },
+      { $set: { read: true } }
+    );
+
+    return successResponse(null, 'All notifications marked as read');
+  } catch (err: any) {
+    console.error('Mark all read error:', err);
+    return errorResponse('Something went wrong', 500);
+  }
+}

@@ -80,8 +80,38 @@ class HackathonService {
     return data;
   }
 
-  async registerHackathon(id) {
-    const { data } = await api.post(`/hackathons/${id}/register`);
+  async registerHackathon(id, payload = {}) {
+    const { data } = await api.post(`/hackathons/${id}/register`, payload);
+    return data;
+  }
+
+  async getMyTeam(id) {
+    const { data } = await api.get(`/hackathons/${id}/my-team`);
+    return data;
+  }
+
+  async leaveOrDisbandTeam(id) {
+    const { data } = await api.delete(`/hackathons/${id}/my-team`);
+    return data;
+  }
+
+  async getParticipateData(id) {
+    const { data } = await api.get(`/hackathons/${id}/participate`);
+    return data;
+  }
+
+  async getSubmissions(id, params = {}) {
+    const { data } = await api.get(`/hackathons/${id}/submissions`, { params });
+    return data;
+  }
+
+  async submitWork(id, submissionData) {
+    const { data } = await api.post(`/hackathons/${id}/submissions`, submissionData);
+    return data;
+  }
+
+  async getResults(id) {
+    const { data } = await api.get(`/hackathons/${id}/results`);
     return data;
   }
 }

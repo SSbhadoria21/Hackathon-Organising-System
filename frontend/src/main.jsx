@@ -20,7 +20,8 @@ import {
   Achievers,
   Profile,
   EditProfile,
-  HackathonDetail
+  HackathonDetail,
+  Participate
 } from './pages/pagesIndex.js'
 import store from './store/store.js'
 
@@ -76,6 +77,14 @@ const router = createBrowserRouter([
           {
             element: <ProtectedRoute />,
             children: [
+              {
+                path: "/hackathon/:id/participate",
+                element: <Participate />
+              },
+              {
+                path: "/hackathons/:id/participate",
+                element: <Participate />
+              },
               {
                 path: "/create-hackathon",
                 element: <CreateHackathon />

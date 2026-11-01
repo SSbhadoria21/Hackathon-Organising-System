@@ -12,6 +12,7 @@ import Payments from "./Payments.jsx";
 import Judges from "./Judges.jsx";
 import FormStepper from "./FormStepper.jsx";
 import ReviewPublish from "./ReviewPublish.jsx";
+import RegistrationModal from "./RegistrationModal.jsx";
 
 export {
   Button,
@@ -28,4 +29,5 @@ export {
   Judges,
   FormStepper,
   ReviewPublish,
+  RegistrationModal,
 };

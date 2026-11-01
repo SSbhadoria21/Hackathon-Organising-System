@@ -18,6 +18,7 @@ import {
   Radio,
 } from 'lucide-react';
 import hackathonService from '../../backend/hackathon.js';
+import { RegistrationModal } from '../../components/componentsIndex.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -503,18 +504,17 @@ function HackathonCard({ hackathon, onRegister, registering, onCardClick }) {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onRegister(id);
+                onRegister(hackathon);
               }}
-              disabled={isUserRegistered || registering}
               className={`flex items-center gap-1 text-xs font-semibold font-space px-5 py-2 rounded-full shadow-sm transition-all cursor-pointer
                 ${isUserRegistered
-                  ? 'bg-green-100 text-green-700 cursor-default'
-                  : 'bg-darker-blue text-white hover:bg-dark-blue active:scale-95 disabled:opacity-60'
+                  ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 cursor-pointer'
+                  : 'bg-darker-blue text-white hover:bg-dark-blue active:scale-95'
                 }`}
             >
               {isUserRegistered ? (
                 <>
-                  <CheckCircle2 size={13} /> Registered
+                  <CheckCircle2 size={13} /> Team Hub →
                 </>
               ) : registering ? (
                 'Registering…'
@@ -575,6 +575,8 @@ const Home = () => {
   const [modeFilter, setModeFilter] = useState('ALL');
   const [page, setPage] = useState(1);
   const [registeringIds, setRegisteringIds] = useState(new Set());
+  const [selectedHackathonForReg, setSelectedHackathonForReg] = useState(null);
+  const [isRegModalOpen, setIsRegModalOpen] = useState(false);
 
   const fetchData = useCallback(async (opts = {}) => {
     setLoading(true);
@@ -602,30 +604,28 @@ const Home = () => {
     setPage(1);
   };
 
-  const handleRegister = async (id) => {
-    if (registeringIds.has(id)) return;
-    setRegisteringIds((prev) => new Set([...prev, id]));
-    try {
-      await hackathonService.registerHackathon(id);
-      setHomeData((prev) => {
-        if (!prev) return prev;
-        const updatedHackathons = (prev.hackathons || []).map((h) =>
-          h._id?.toString() === id || h.slug === id
-            ? { ...h, isUserRegistered: true }
-            : h
-        );
-        return { ...prev, hackathons: updatedHackathons };
-      });
-    } catch (err) {
-      const msg = err?.response?.data?.message || 'Registration failed. Please try again.';
-      alert(msg);
-    } finally {
-      setRegisteringIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
+  const handleRegisterClick = (hackathon) => {
+    const hId = hackathon._id?.toString() || hackathon.slug;
+    if (hackathon.isUserRegistered) {
+      navigate(`/hackathon/${hId}/participate`);
+      return;
     }
+    setSelectedHackathonForReg(hackathon);
+    setIsRegModalOpen(true);
+  };
+
+  const handleRegistrationSuccess = (regResult) => {
+    const regId =
+      selectedHackathonForReg?._id?.toString() || selectedHackathonForReg?.slug;
+    setHomeData((prev) => {
+      if (!prev) return prev;
+      const updatedHackathons = (prev.hackathons || []).map((h) =>
+        h._id?.toString() === regId || h.slug === regId
+          ? { ...h, isUserRegistered: true }
+          : h
+      );
+      return { ...prev, hackathons: updatedHackathons };
+    });
   };
 
   const {
@@ -701,7 +701,7 @@ const Home = () => {
             <HackathonCard
               key={h._id?.toString() || h.slug}
               hackathon={h}
-              onRegister={handleRegister}
+              onRegister={handleRegisterClick}
               registering={registeringIds.has(h._id?.toString() || h.slug)}
               onCardClick={(cardId) => navigate(`/hackathon/${cardId}`)}
             />
@@ -733,6 +733,14 @@ const Home = () => {
           </div>
         )}
       </div>
+
+      {/* Registration Modal Form */}
+      <RegistrationModal
+        isOpen={isRegModalOpen}
+        onClose={() => setIsRegModalOpen(false)}
+        hackathon={selectedHackathonForReg}
+        onRegistrationSuccess={handleRegistrationSuccess}
+      />
     </div>
   );
 };

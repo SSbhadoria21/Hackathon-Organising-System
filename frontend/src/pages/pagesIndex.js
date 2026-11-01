@@ -13,6 +13,7 @@ import Achievers from './Achievers/Achievers.jsx'
 import Profile from './Profile/Profile.jsx'
 import EditProfile from './EditProfile/EditProfile.jsx'
 import HackathonDetail from './HackathonDetail/HackathonDetail.jsx'
+import Participate from './Participate/Participate.jsx'
 
 export {
     Home,
@@ -30,4 +31,5 @@ export {
     Profile,
     EditProfile,
     HackathonDetail,
+    Participate,
 }

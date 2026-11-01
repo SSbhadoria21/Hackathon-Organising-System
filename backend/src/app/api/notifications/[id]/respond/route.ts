@@ -48,8 +48,10 @@ export async function POST(
 
     if (notification.type === 'JUDGE_INVITE') {
       const judgeId = metadata.judgeId;
+      let judge = null;
+      const authUser = await User.findById(auth._id).select('username fullName email').lean();
+
       if (judgeId) {
-        const authUser = await User.findById(auth._id).select('username fullName email').lean();
         const updateSet: any = {
           status: newActionStatus,
           userId: auth._id,
@@ -57,17 +59,48 @@ export async function POST(
         if (authUser?.username) updateSet.username = authUser.username;
         if (authUser?.fullName) updateSet.name = authUser.fullName;
 
-        await Judge.findByIdAndUpdate(judgeId, {
-          $set: updateSet,
-        });
+        judge = await Judge.findByIdAndUpdate(
+          judgeId,
+          { $set: updateSet },
+          { new: true }
+        );
       }
 
       notification.actionStatus = newActionStatus;
       notification.read = true;
       await notification.save();
 
+      // Notify the organizer about the judge's response
+      const hackathonId = judge?.hackathonId || metadata.hackathonId;
+      const hackathon = hackathonId
+        ? await Hackathon.findById(hackathonId).select('organizerId eventName').lean()
+        : null;
+
+      const organizerId = judge?.invitedBy || hackathon?.organizerId;
+
+      if (organizerId && organizerId.toString() !== auth._id.toString()) {
+        const judgeName = authUser?.fullName || authUser?.username || judge?.name || 'A judge';
+        const hackathonName = hackathon?.eventName || metadata.hackathonName || 'Hackathon';
+
+        await Notification.create({
+          userId: organizerId,
+          type: 'JUDGE_ASSIGNED',
+          title: `Judge Invitation ${action === 'ACCEPT' ? 'Accepted' : 'Declined'}`,
+          message: `${judgeName} has ${action === 'ACCEPT' ? 'accepted' : 'declined'} your invitation to judge "${hackathonName}".`,
+          read: false,
+          metadata: {
+            hackathonId: String(hackathonId || ''),
+            hackathonName: String(hackathonName),
+            judgeId: String(judgeId || ''),
+            judgeName: String(judgeName),
+            judgeUsername: String(authUser?.username || judge?.username || ''),
+            status: newActionStatus,
+          },
+        });
+      }
+
       return successResponse(
-        { actionStatus: newActionStatus, type: 'JUDGE_INVITE' },
+        { actionStatus: newActionStatus, type: 'JUDGE_INVITE', judgeId },
         `Invitation ${action === 'ACCEPT' ? 'accepted' : 'declined'}`
       );
     }
