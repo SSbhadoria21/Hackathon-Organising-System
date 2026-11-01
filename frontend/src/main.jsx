@@ -19,7 +19,8 @@ import {
   Reminders,
   Achievers,
   Profile,
-  EditProfile
+  EditProfile,
+  HackathonDetail
 } from './pages/pagesIndex.js'
 import store from './store/store.js'
 
@@ -59,6 +60,14 @@ const router = createBrowserRouter([
           {
             path: "/home",
             element: <Home />
+          },
+          {
+            path: "/hackathon/:id",
+            element: <HackathonDetail />
+          },
+          {
+            path: "/hackathons/:id",
+            element: <HackathonDetail />
           },
           {
             path: "/achievers",

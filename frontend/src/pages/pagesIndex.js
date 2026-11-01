@@ -12,6 +12,7 @@ import Reminders from './Reminders/Reminders.jsx'
 import Achievers from './Achievers/Achievers.jsx'
 import Profile from './Profile/Profile.jsx'
 import EditProfile from './EditProfile/EditProfile.jsx'
+import HackathonDetail from './HackathonDetail/HackathonDetail.jsx'
 
 export {
     Home,
@@ -28,4 +29,5 @@ export {
     Achievers,
     Profile,
     EditProfile,
+    HackathonDetail,
 }

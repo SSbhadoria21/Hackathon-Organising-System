@@ -74,6 +74,16 @@ class HackathonService {
     const { data } = await api.get(`/hackathons/${id}`);
     return data;
   }
+
+  async getHomeData(params = {}) {
+    const { data } = await api.get("/home", { params });
+    return data;
+  }
+
+  async registerHackathon(id) {
+    const { data } = await api.post(`/hackathons/${id}/register`);
+    return data;
+  }
 }
 
 const hackathonService = new HackathonService();
