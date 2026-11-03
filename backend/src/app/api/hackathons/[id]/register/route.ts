@@ -20,11 +20,40 @@ export async function POST(
     const auth = requireAuth(req);
     if (auth instanceof Response) return auth;
 
-    const isObjectId = mongoose.Types.ObjectId.isValid(id);
-    const query = isObjectId ? { _id: id } : { slug: id };
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch {
+      body = {};
+    }
 
-    const hackathon = await Hackathon.findOne(query).lean();
+    const action = (body.action || 'CREATE').toUpperCase();
+    const inputInviteCode = (body.inviteCode || '').trim().toUpperCase();
+
+    let hackathon: any = null;
+    let targetTeam: any = null;
+
+    if (action === 'JOIN' && inputInviteCode) {
+      // Find team by invite code across the system
+      targetTeam = await Team.findOne({ inviteCode: inputInviteCode });
+      if (targetTeam) {
+        hackathon = await Hackathon.findById(targetTeam.hackathonId).lean();
+      }
+    }
+
     if (!hackathon) {
+      const isObjectId = mongoose.Types.ObjectId.isValid(id);
+      const query = isObjectId ? { _id: id } : { slug: id };
+      hackathon = await Hackathon.findOne(query).lean();
+    }
+
+    if (!hackathon) {
+      if (action === 'JOIN') {
+        return errorResponse(
+          `Invalid team invite code "${inputInviteCode}". Team or hackathon not found.`,
+          404
+        );
+      }
       return errorResponse('Hackathon not found', 404);
     }
 
@@ -57,30 +86,18 @@ export async function POST(
       return errorResponse('You are already registered in this hackathon', 409);
     }
 
-    let body: any = {};
-    try {
-      body = await req.json();
-    } catch {
-      // Empty body defaults to CREATE with user's name
-      body = {};
-    }
-
     const user = await User.findById(auth._id).select('fullName username email avatar').lean();
     const defaultTeamName = `${user?.fullName || user?.username || 'Participant'}'s Team`;
 
-    // Normalise action
-    const action = (body.action || 'CREATE').toUpperCase();
-
     if (action === 'JOIN') {
-      const inviteCode = (body.inviteCode || '').trim().toUpperCase();
-      if (!inviteCode) {
+      if (!inputInviteCode) {
         return errorResponse('Invite code is required to join a team', 400);
       }
 
-      const team = await Team.findOne({
+      const team = targetTeam || (await Team.findOne({
         hackathonId: hackathon._id,
-        inviteCode,
-      });
+        inviteCode: inputInviteCode,
+      }));
 
       if (!team) {
         return errorResponse('Invalid invite code or team does not exist for this hackathon', 404);
@@ -123,6 +140,12 @@ export async function POST(
           teamId: team._id.toString(),
           teamName: team.name,
           inviteCode: team.inviteCode,
+          hackathonId: hackathon._id.toString(),
+          hackathonSlug: hackathon.slug,
+          eventName: hackathon.eventName,
+          paid: hackathon.paid,
+          feeAmount: hackathon.feeAmount,
+          isTeamPaid: team.paymentStatus === 'PAID',
           message: `Successfully joined "${team.name}"!`,
         },
         'Joined team successfully',
@@ -144,12 +167,12 @@ export async function POST(
       return errorResponse('This hackathon has reached maximum team capacity', 400);
     }
 
-    const inviteCode = nanoid(8).toUpperCase();
+    const generatedInviteCode = nanoid(8).toUpperCase();
 
     const team = await Team.create({
       name: teamName,
       hackathonId: hackathon._id,
-      inviteCode,
+      inviteCode: generatedInviteCode,
       members: [auth._id],
       leaderId: auth._id,
       paymentStatus: hackathon.paid ? 'PENDING' : 'NOT_REQUIRED',
@@ -171,8 +194,14 @@ export async function POST(
         isRegistered: true,
         teamId: team._id.toString(),
         teamName: team.name,
-        inviteCode,
-        message: `Team "${teamName}" created! Share invite code: ${inviteCode}`,
+        inviteCode: generatedInviteCode,
+        hackathonId: hackathon._id.toString(),
+        hackathonSlug: hackathon.slug,
+        eventName: hackathon.eventName,
+        paid: hackathon.paid,
+        feeAmount: hackathon.feeAmount,
+        isTeamPaid: team.paymentStatus === 'PAID',
+        message: `Team "${teamName}" created! Share invite code: ${generatedInviteCode}`,
       },
       'Team created and registered successfully',
       201

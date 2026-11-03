@@ -40,6 +40,10 @@ const createDefaultRound = (roundNumber, defaultOpens, defaultCloses) => ({
   maxTeamsAdvancing: 10,
   aiWeightage: 0.4,
   scoreThreshold: 0,
+  isOnline: true,
+  offlineVenue: "",
+  offlineAddress: "",
+  offlineMapLink: "",
   criterias: DEFAULT_CRITERIAS.map((c) => ({ ...c })),
   quizQuestions: [
     {
@@ -75,6 +79,10 @@ const Rounds = ({
           maxTeamsAdvancing: r.maxTeamsAdvancing ?? 10,
           aiWeightage: r.aiWeightage ?? 0.4,
           scoreThreshold: r.scoreThreshold ?? 0,
+          isOnline: r.isOnline !== false,
+          offlineVenue: r.offlineVenue || "",
+          offlineAddress: r.offlineAddress || "",
+          offlineMapLink: r.offlineMapLink || "",
           criterias:
             Array.isArray(r.criterias) && r.criterias.length > 0
               ? r.criterias.map((c) => ({
@@ -255,6 +263,10 @@ const Rounds = ({
       maxTeamsAdvancing: Number(r.maxTeamsAdvancing) || 10,
       aiWeightage: Number(r.aiWeightage) ?? 0.4,
       scoreThreshold: Number(r.scoreThreshold) || 0,
+      isOnline: r.isOnline !== false,
+      offlineVenue: r.isOnline === false ? (r.offlineVenue || "").trim() : undefined,
+      offlineAddress: r.isOnline === false ? (r.offlineAddress || "").trim() : undefined,
+      offlineMapLink: r.isOnline === false ? (r.offlineMapLink || "").trim() : undefined,
       criterias: r.criterias.map((c) => ({
         name: c.name.trim(),
         weight: Number(c.weight) || 0,
@@ -397,6 +409,71 @@ const Rounds = ({
               required
             />
           </div>
+        </div>
+
+        {/* Online / Offline Mode */}
+        <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
+          <label className="block text-sm font-medium text-gray-800 mb-2">Round Format</label>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => updateCurrentRound("isOnline", true)}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer ${
+                currentRound.isOnline !== false
+                  ? "bg-black text-white"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              🌐 Online
+            </button>
+            <button
+              type="button"
+              onClick={() => updateCurrentRound("isOnline", false)}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer ${
+                currentRound.isOnline === false
+                  ? "bg-black text-white"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              📍 Offline / In-Person
+            </button>
+          </div>
+
+          {currentRound.isOnline === false && (
+            <div className="pt-2 space-y-3 border-t border-gray-200">
+              <p className="text-xs text-gray-500">Provide venue details for offline participants.</p>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-800">Venue / Hall Name <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  placeholder="e.g. Main Auditorium, Block B"
+                  value={currentRound.offlineVenue || ""}
+                  onChange={(e) => updateCurrentRound("offlineVenue", e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-800">Full Address</label>
+                <textarea
+                  rows={2}
+                  placeholder="Street, City, State, PIN"
+                  value={currentRound.offlineAddress || ""}
+                  onChange={(e) => updateCurrentRound("offlineAddress", e.target.value)}
+                  className={`${inputClass} resize-none`}
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-800">Google Maps Link</label>
+                <input
+                  type="url"
+                  placeholder="https://maps.google.com/..."
+                  value={currentRound.offlineMapLink || ""}
+                  onChange={(e) => updateCurrentRound("offlineMapLink", e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Advancement & AI Weights */}

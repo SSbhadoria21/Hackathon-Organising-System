@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react'
 import './Landing.css'
 import laptopLanding from '../../assets/laptopLanding.png'
+import createamanage from '../../assets/create.jpeg'
 import dash1Landing from '../../assets/dash1Landing.png'
 import dash2Landing from '../../assets/dash2Landing.png'
 import { Button } from '../../components/componentsIndex.js'
@@ -17,6 +18,9 @@ import comingSoon from '../../assets/comingSoon.png'
 import cloudsLanding from '../../assets/cloudsLanding.png'
 import logo from '../../assets/logo.png'
 import { useNavigate } from 'react-router-dom'
+import judging from "../../assets/judging.png"
+import team from "../../assets/team.png"
+import discover from "../../assets/discovered.png"
 
 
 const Landing = () => {
@@ -132,7 +136,9 @@ const Landing = () => {
 
 
         <div ref={manageRef} className='flex items-center mt-20 ml-10 w-230 create&manage'>
-          <div className='w-99.75 h-66.25 bg-violet-400 leftImage'></div>
+          <div className='w-99.75 h-66.25 bg-violet-400 leftImage' style={{backgroundImage:`url(${createamanage})`,backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',}}> </div>
 
           <div className='ml-6 flex flex-col items-center rightTexts'>
             <div className='bg-light-green/70 text-dark-green px-5 py-1 rounded-full text-4xl font-space font-bold '>
@@ -154,6 +160,7 @@ const Landing = () => {
 
         <div ref={aiJudgeRef} className='flex justify-end mt-45 mr-10 items-center h-auto w-auto aiJudge'>
 
+          
           <div className='mr-6 flex flex-col items-center'>
             <div className='bg-light-green/70 text-dark-green px-5 py-1 rounded-full text-4xl font-space font-bold '>
               AI Assited Judging
@@ -167,7 +174,9 @@ const Landing = () => {
           </div>
 
 
-          <div className='w-99.75 h-66.25 bg-violet-400 leftImage'></div>
+          <div className='w-99.75 h-66.25 bg-violet-400 leftImage' style={{backgroundImage:`url(${judging})`,backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',}}></div>
 
         </div>
 
@@ -176,7 +185,9 @@ const Landing = () => {
 
 
         <div ref={teamRef} className='flex items-center mt-45 ml-10 w-230 teamUp'>
-          <div className='w-99.75 h-66.25 bg-violet-400 leftImage'></div>
+          <div className='w-99.75 h-66.25 bg-violet-400 leftImage' style={{backgroundImage:`url(${team})`,backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',}}></div>
 
           <div className='ml-6 flex flex-col items-center rightTexts'>
             <div className='bg-light-green/70 text-dark-green px-5 py-1 rounded-full text-4xl font-space font-bold '>
@@ -210,7 +221,9 @@ const Landing = () => {
           </div>
 
 
-          <div className='w-99.75 h-66.25 bg-violet-400 leftImage'></div>
+          <div className='w-99.75 h-66.25 bg-violet-400 leftImage ' style={{backgroundImage:`url(${discover})`,backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'}}></div>
 
         </div>
 

@@ -14,6 +14,9 @@ import Profile from './Profile/Profile.jsx'
 import EditProfile from './EditProfile/EditProfile.jsx'
 import HackathonDetail from './HackathonDetail/HackathonDetail.jsx'
 import Participate from './Participate/Participate.jsx'
+import Activities from './Activities/Activities.jsx'
+import Payment from './Payment/Payment.jsx'
+import ManageHackathon from './ManageHackathon/ManageHackathon.jsx'
 
 export {
     Home,
@@ -32,4 +35,7 @@ export {
     EditProfile,
     HackathonDetail,
     Participate,
+    Activities,
+    Payment,
+    ManageHackathon,
 }

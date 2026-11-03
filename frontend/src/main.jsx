@@ -21,7 +21,10 @@ import {
   Profile,
   EditProfile,
   HackathonDetail,
-  Participate
+  Participate,
+  Activities,
+  Payment,
+  ManageHackathon,
 } from './pages/pagesIndex.js'
 import store from './store/store.js'
 
@@ -86,8 +89,36 @@ const router = createBrowserRouter([
                 element: <Participate />
               },
               {
+                path: "/hackathon/:id/payment",
+                element: <Payment />
+              },
+              {
+                path: "/hackathons/:id/payment",
+                element: <Payment />
+              },
+              {
+                path: "/hackathon/:id/manage",
+                element: <ManageHackathon />
+              },
+              {
+                path: "/hackathons/:id/manage",
+                element: <ManageHackathon />
+              },
+              {
                 path: "/create-hackathon",
                 element: <CreateHackathon />
+              },
+              {
+                path: "/activities",
+                element: <Activities />
+              },
+              {
+                path: "/created-hackathons",
+                element: <Activities initialTab="created" />
+              },
+              {
+                path: "/participations",
+                element: <Activities initialTab="participations" />
               },
               {
                 path: "/my-teams",

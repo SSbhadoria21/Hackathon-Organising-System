@@ -25,6 +25,11 @@ export interface IRound extends Document {
 
   criterias: ICriterion[];
 
+  isOnline: boolean;
+  offlineVenue?: string;
+  offlineAddress?: string;
+  offlineMapLink?: string;
+
   quizQuestions?: {
     question: string;
     options: string[];
@@ -56,6 +61,10 @@ const RoundSchema: Schema<IRound> = new Schema(
         description: { type: String, required: true },
       },
     ],
+    isOnline:      { type: Boolean, default: true },
+    offlineVenue:  { type: String },
+    offlineAddress:{ type: String },
+    offlineMapLink:{ type: String },
     quizQuestions: [
       {
         question:        { type: String, required: true },

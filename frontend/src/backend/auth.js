@@ -168,11 +168,12 @@ class AuthService {
         return data;
     }
 
-    // async editProfile({}){
-    //     const {data} = await api.patch("/users/profile");
-
-    //     return data;
-    // }
+    async searchUsers(query) {
+        const { data } = await api.get("/users/search", {
+            params: { q: query }
+        });
+        return data;
+    }
 }
 
 const authService = new AuthService();

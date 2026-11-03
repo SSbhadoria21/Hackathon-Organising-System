@@ -230,19 +230,22 @@ const RegistrationModal = ({
           ) : successData ? (
             /* ─── SUCCESS CELEBRATION STATE ─── */
             <div className="text-center py-4 space-y-5 animate-in zoom-in-95 duration-200">
-              <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md border border-emerald-200">
+              <div className={`w-16 h-16 rounded-3xl ${hackathon.paid ? 'bg-purple-100 text-purple-600 border-purple-200' : 'bg-emerald-100 text-emerald-600 border-emerald-200'} flex items-center justify-center mx-auto shadow-md border`}>
                 <CheckCircle2 size={34} />
               </div>
 
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                  Registration Confirmed 🎉
+                <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${hackathon.paid ? 'text-purple-700 bg-purple-50 border-purple-200' : 'text-emerald-600 bg-emerald-50 border-emerald-200'}`}>
+                  {hackathon.paid ? 'Team Created! 🎉 Payment Required' : 'Registration Confirmed 🎉'}
                 </span>
                 <h3 className="text-2xl font-extrabold text-darker-blue mt-2">
-                  You&apos;re Officially In!
+                  {hackathon.paid ? 'One More Step!' : "You're Officially In!"}
                 </h3>
                 <p className="text-xs text-gray-500 font-alef mt-1">
-                  Welcome to <strong>{hackathon.eventName}</strong>. Get your team ready!
+                  {hackathon.paid
+                    ? `Your team has been created. Complete payment of ₹${hackathon.feeAmount} to activate your registration.`
+                    : `Welcome to ${hackathon.eventName}. Get your team ready!`
+                  }
                 </p>
               </div>
 
@@ -291,16 +294,36 @@ const RegistrationModal = ({
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    navigate(`/hackathon/${hackathonId}/participate`);
-                  }}
-                  className="w-full py-3 rounded-xl bg-darker-blue text-white text-xs font-bold hover:bg-dark-blue shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  Go to Participation Hub <ArrowRight size={14} />
-                </button>
+                {((hackathon.paid || successData?.paid) && !successData?.isTeamPaid) ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      const targetHackathonId = successData?.hackathonId || successData?.team?.hackathonId || hackathonId;
+                      navigate(`/hackathon/${targetHackathonId}/payment`, {
+                        state: {
+                          hackathon,
+                          team: successData?.team || { name: teamName },
+                        },
+                      });
+                    }}
+                    className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    💳 Proceed to Payment (₹{successData?.feeAmount || hackathon.feeAmount}) <ArrowRight size={14} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      const targetHackathonId = successData?.hackathonId || successData?.team?.hackathonId || hackathonId;
+                      navigate(`/hackathon/${targetHackathonId}/participate`);
+                    }}
+                    className="w-full py-3 rounded-xl bg-darker-blue text-white text-xs font-bold hover:bg-dark-blue shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    Go to Participation Hub <ArrowRight size={14} />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={onClose}
@@ -347,6 +370,25 @@ const RegistrationModal = ({
                   Join with Code
                 </button>
               </div>
+
+              {/* Paid / Free Registration Badge */}
+              {hackathon.paid ? (
+                <div className="p-3 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-xs flex items-center justify-between">
+                  <span className="font-semibold flex items-center gap-1.5">
+                    💳 Registration Fee
+                  </span>
+                  <span className="font-bold text-xs bg-purple-600 text-white px-2.5 py-1 rounded-lg shadow-xs">
+                    ₹{hackathon.feeAmount}
+                  </span>
+                </div>
+              ) : (
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between">
+                  <span className="font-semibold">🎟️ Entry Type</span>
+                  <span className="font-bold text-[11px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
+                    Free Entry
+                  </span>
+                </div>
+              )}
 
               {/* Error Alert */}
               {error && (
@@ -486,11 +528,11 @@ const RegistrationModal = ({
                     </>
                   ) : activeTab === 'CREATE' ? (
                     <>
-                      Create Team & Register <ChevronRight size={14} />
+                      {hackathon.paid ? `Create Team & Register (₹${hackathon.feeAmount})` : 'Create Team & Register'} <ChevronRight size={14} />
                     </>
                   ) : (
                     <>
-                      Join Team & Register <ChevronRight size={14} />
+                      {hackathon.paid ? `Join Team & Register (₹${hackathon.feeAmount})` : 'Join Team & Register'} <ChevronRight size={14} />
                     </>
                   )}
                 </button>

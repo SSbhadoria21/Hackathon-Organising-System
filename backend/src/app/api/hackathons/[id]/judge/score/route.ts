@@ -6,6 +6,9 @@ import { Hackathon } from '@/models/Hackathon';
 import { Judge } from '@/models/Judge';
 import { Round } from '@/models/Round';
 import { Submission } from '@/models/Submission';
+import { Team } from '@/models/Team';
+import { Result } from '@/models/Result';
+import { Notification } from '@/models/Notification';
 import { JudgeScore } from '@/models/JudgeScore';
 import { User } from '@/models/User';
 import { requireAuth } from '@/lib/withAuth';
@@ -24,6 +27,8 @@ const submitScoreSchema = z.object({
     .min(1, 'At least one criteria score is required'),
   overallComment: z.string().optional(),
   scoredAfterSeingAI: z.boolean().default(false),
+  advanceTeam: z.boolean().optional(),
+  status: z.enum(['ADVANCED', 'REJECTED', 'EVALUATING']).optional(),
 });
 
 export async function POST(
@@ -32,19 +37,19 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return errorResponse('Invalid hackathon ID', 400);
-    }
-
     await dbConnect();
     const auth = requireAuth(req);
     if (auth instanceof Response) return auth;
 
-    const hackathon = await Hackathon.findById(id).lean();
+    const isObjectId = mongoose.Types.ObjectId.isValid(id);
+    const query = isObjectId ? { _id: id } : { slug: id };
+
+    const hackathon = await Hackathon.findOne(query).lean();
     if (!hackathon) {
       return errorResponse('Hackathon not found', 404);
     }
 
+    const hackathonId = hackathon._id;
     const isOrganizer = hackathon.organizerId.toString() === auth._id;
 
     const user = await User.findById(auth._id).select('email').lean();
@@ -53,7 +58,7 @@ export async function POST(
     let judge: any = null;
     if (!isOrganizer) {
       judge = await Judge.findOne({
-        hackathonId: id,
+        hackathonId,
         status: 'ACCEPTED',
         $or: [
           { userId: auth._id },
@@ -76,7 +81,14 @@ export async function POST(
       );
     }
 
-    const { submissionId, criteriaScores, overallComment, scoredAfterSeingAI } = parsed.data;
+    const {
+      submissionId,
+      criteriaScores,
+      overallComment,
+      scoredAfterSeingAI,
+      advanceTeam,
+      status: requestedStatus,
+    } = parsed.data;
 
     if (!mongoose.Types.ObjectId.isValid(submissionId)) {
       return errorResponse('Invalid submission ID', 400);
@@ -84,7 +96,7 @@ export async function POST(
 
     const submission = await Submission.findOne({
       _id: submissionId,
-      hackathonId: id,
+      hackathonId,
     });
 
     if (!submission) {
@@ -111,13 +123,28 @@ export async function POST(
       return errorResponse('Round not found', 404);
     }
 
-    const validCriteriaIds = new Set((round.criterias || []).map((c: any) => c._id.toString()));
+    let roundCriterias = (round.criterias || []) as any[];
+    if (roundCriterias.length === 0) {
+      const defaultCrit = {
+        _id: new mongoose.Types.ObjectId(),
+        name: 'Overall Innovation & Execution',
+        weight: 100,
+        description: 'Evaluation of the project quality, innovation, and execution',
+      };
+      await Round.findByIdAndUpdate(submission.roundId, {
+        $push: { criterias: defaultCrit },
+      });
+      roundCriterias = [defaultCrit];
+    }
+
+    const validCriteriaIds = new Set(roundCriterias.map((c: any) => c._id?.toString()));
     const formattedCriteriaScores = criteriaScores.map((c) => {
-      if (!validCriteriaIds.has(c.criteriaId)) {
-        throw new Error(`Invalid criteria ID: ${c.criteriaId}`);
+      let cId = c.criteriaId;
+      if (!validCriteriaIds.has(cId)) {
+        cId = roundCriterias[0]._id.toString();
       }
       return {
-        criteriaId: new mongoose.Types.ObjectId(c.criteriaId),
+        criteriaId: new mongoose.Types.ObjectId(cId),
         score: c.score,
         comment: c.comment,
       };
@@ -127,10 +154,10 @@ export async function POST(
     // If organizer is judging directly without a Judge doc, find or create temporary judge doc
     let effectiveJudgeId = judge?._id;
     if (!effectiveJudgeId && isOrganizer) {
-      let orgJudge = await Judge.findOne({ hackathonId: id, userId: auth._id });
+      let orgJudge = await Judge.findOne({ hackathonId, userId: auth._id });
       if (!orgJudge) {
         orgJudge = await Judge.create({
-          hackathonId: id,
+          hackathonId,
           userId: auth._id,
           name: 'Organizer',
           email: user?.email || 'organizer@hackathon.com',
@@ -149,7 +176,7 @@ export async function POST(
       },
       {
         $set: {
-          hackathonId: id,
+          hackathonId,
           roundId: submission.roundId,
           criteriaScores: formattedCriteriaScores,
           overallComment,
@@ -160,15 +187,96 @@ export async function POST(
       { upsert: true, new: true }
     );
 
-    // If submission is currently in SUBMITTED, update to EVALUATING
-    if (submission.status === 'SUBMITTED') {
+    // Handle status change or advanceTeam
+    const shouldAdvance = advanceTeam === true || requestedStatus === 'ADVANCED';
+    const shouldReject = requestedStatus === 'REJECTED';
+
+    if (shouldAdvance) {
+      submission.status = 'ADVANCED';
+      await submission.save();
+
+      // Find next round and grant eligibility
+      const nextRound = await Round.findOne({
+        hackathonId,
+        roundNumber: round.roundNumber + 1,
+      });
+
+      if (nextRound) {
+        await Round.findByIdAndUpdate(nextRound._id, {
+          $addToSet: { teamIds: submission.teamId },
+        });
+      }
+
+      // Compute score average for this evaluation
+      const cSum = formattedCriteriaScores.reduce((acc, c) => acc + c.score, 0);
+      const avg = formattedCriteriaScores.length ? parseFloat((cSum / formattedCriteriaScores.length).toFixed(1)) : 0;
+
+      // Upsert Result record
+      await Result.findOneAndUpdate(
+        { hackathonId, roundId: submission.roundId, teamId: submission.teamId },
+        {
+          $set: {
+            submissionId: submission._id,
+            finalScore: avg,
+            humanScoreTotal: avg,
+            advanced: true,
+            published: true,
+          },
+        },
+        { upsert: true, new: true }
+      );
+
+      // Notify team leader
+      const team = await Team.findById(submission.teamId);
+      if (team?.leaderId) {
+        await Notification.create({
+          userId: team.leaderId,
+          type: 'ROUND_RESULT',
+          title: `🎉 You have cleared Round ${round.roundNumber}!`,
+          message: `Congratulations! Your team "${team.name}" has cleared Round ${round.roundNumber} (${round.roundName})${nextRound ? ` and is now eligible to submit work for Round ${nextRound.roundNumber}: ${nextRound.roundName}.` : ' and reached the finals!'}`,
+          read: false,
+          metadata: {
+            hackathonId: id,
+            roundId: submission.roundId.toString(),
+            teamId: team._id.toString(),
+            advanced: 'true',
+          },
+        });
+      }
+    } else if (shouldReject) {
+      submission.status = 'REJECTED';
+      await submission.save();
+
+      const cSum = formattedCriteriaScores.reduce((acc, c) => acc + c.score, 0);
+      const avg = formattedCriteriaScores.length ? parseFloat((cSum / formattedCriteriaScores.length).toFixed(1)) : 0;
+
+      await Result.findOneAndUpdate(
+        { hackathonId: id, roundId: submission.roundId, teamId: submission.teamId },
+        {
+          $set: {
+            submissionId: submission._id,
+            finalScore: avg,
+            humanScoreTotal: avg,
+            advanced: false,
+            published: true,
+          },
+        },
+        { upsert: true, new: true }
+      );
+    } else if (submission.status === 'SUBMITTED') {
       submission.status = 'EVALUATING';
       await submission.save();
     }
 
     return successResponse(
-      judgeScore,
-      'Submission score saved successfully'
+      {
+        judgeScore,
+        submissionStatus: submission.status,
+        advanced: shouldAdvance,
+      },
+      shouldAdvance
+        ? 'Submission scored and team cleared round successfully! 🎉'
+        : 'Submission score saved successfully'
     );
   } catch (err: any) {
     console.error('Submit score error:', err);

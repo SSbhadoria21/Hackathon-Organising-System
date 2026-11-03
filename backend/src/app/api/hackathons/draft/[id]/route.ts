@@ -183,6 +183,10 @@ export async function PATCH(
                 maxTeamsAdvancing: Number(r.maxTeamsAdvancing) || 10,
                 aiWeightage: r.aiWeightage !== undefined ? Number(r.aiWeightage) : 0.4,
                 scoreThreshold: r.scoreThreshold !== undefined ? Number(r.scoreThreshold) : 0,
+                isOnline: r.isOnline !== false,
+                offlineVenue: r.isOnline === false ? (r.offlineVenue || '').trim() || undefined : undefined,
+                offlineAddress: r.isOnline === false ? (r.offlineAddress || '').trim() || undefined : undefined,
+                offlineMapLink: r.isOnline === false ? (r.offlineMapLink || '').trim() || undefined : undefined,
                 criterias,
                 quizQuestions: Array.isArray(r.quizQuestions)
                   ? r.quizQuestions

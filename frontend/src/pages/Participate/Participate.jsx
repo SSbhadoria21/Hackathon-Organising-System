@@ -21,6 +21,12 @@ import {
   Radio,
   ChevronRight,
   ShieldAlert,
+  X,
+  CreditCard,
+  UserPlus,
+  MapPin,
+  Building2,
+  Share2,
 } from 'lucide-react';
 import hackathonService from '../../backend/hackathon.js';
 
@@ -206,6 +212,46 @@ const Participate = () => {
     );
   }
 
+  // Payment pending state — show payment prompt
+  if (data?.overallStatus === 'PAYMENT_PENDING') {
+    return (
+      <div className="pt-20 pl-16 pr-6 min-h-screen bg-default-bg font-space">
+        <div className="max-w-xl mx-auto bg-white rounded-3xl p-8 border border-amber-200 text-center space-y-5 shadow-sm">
+          <div className="w-16 h-16 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+            <CreditCard size={30} />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">Payment Required</span>
+            <h2 className="text-xl font-bold text-darker-blue mt-3">Complete Your Registration</h2>
+            <p className="text-xs text-gray-500 font-alef mt-1">
+              Your team has been created. Complete payment to unlock full participation access.
+            </p>
+          </div>
+          {data?.hackathon?.feeAmount && (
+            <div className="p-4 rounded-2xl bg-purple-50 border border-purple-200 text-center">
+              <p className="text-xs text-purple-700 font-semibold">Registration Fee</p>
+              <p className="text-3xl font-extrabold text-purple-900 mt-1">₹{data.hackathon.feeAmount}</p>
+            </div>
+          )}
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => navigate(`/hackathon/${id}/payment`, { state: { hackathon: data.hackathon, team: data.team } })}
+              className="py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+            >
+              <CreditCard size={14} /> Proceed to Payment
+            </button>
+            <button
+              onClick={() => navigate(`/hackathon/${id}`)}
+              className="py-2.5 rounded-xl border border-gray-200 text-gray-600 text-xs font-bold hover:bg-gray-50 transition cursor-pointer"
+            >
+              Back to Hackathon
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const { hackathon, team, overallStatus, rounds = [], summary = {} } = data;
 
   const statusColor =
@@ -360,6 +406,23 @@ const Participate = () => {
                           </div>
                         </div>
 
+                        {/* Offline Venue Info */}
+                        {round.isOnline === false && (
+                          <div className="p-3 rounded-xl bg-orange-50 border border-orange-100 text-xs flex items-start gap-2">
+                            <MapPin size={13} className="text-orange-600 shrink-0 mt-0.5" />
+                            <div>
+                              <p className="font-bold text-orange-900">{round.offlineVenue || 'In-Person Round'}</p>
+                              {round.offlineAddress && <p className="text-orange-700 font-alef">{round.offlineAddress}</p>}
+                              {round.offlineMapLink && (
+                                <a href={round.offlineMapLink} target="_blank" rel="noreferrer"
+                                  className="text-orange-600 underline flex items-center gap-1 mt-0.5">
+                                  <MapPin size={10} /> View on Maps
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
                         {/* Existing Submission Details */}
                         {round.submission && (
                           <div className="p-3.5 rounded-xl bg-white border border-gray-100 text-xs space-y-2">
@@ -419,6 +482,26 @@ const Participate = () => {
                           </div>
                         )}
 
+                        {/* Round Cleared Celebration Banner */}
+                        {(isAdvanced || round.isRoundCleared || round.submission?.status === 'ADVANCED') && (
+                          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 shadow-2xs space-y-1 animate-in fade-in">
+                            <div className="flex items-center gap-2 text-emerald-800 font-extrabold text-sm">
+                              <CheckCircle2 size={18} className="text-emerald-600" />
+                              🎉 You have cleared this round!
+                            </div>
+                            <p className="text-xs text-emerald-700 font-alef pl-6 leading-relaxed">
+                              Congratulations! Your work has been evaluated and approved. Your team has successfully advanced from this round and is now eligible to submit deliverables for the next stage.
+                            </p>
+                          </div>
+                        )}
+
+                        {isEliminated && (
+                          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2 font-alef">
+                            <AlertCircle size={16} className="text-rose-600 shrink-0" />
+                            <span>Evaluation complete. Your team was not selected to advance from this round. Thank you for participating!</span>
+                          </div>
+                        )}
+
                         {/* Result summary if published */}
                         {round.result && (
                           <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-between text-xs">
@@ -433,8 +516,15 @@ const Participate = () => {
                         )}
 
                         {/* Action CTA */}
-                        {isEligible && (isActive || isSubmitted) && (
-                          <div className="pt-2 flex justify-end">
+                        {isEligible && (isActive || isSubmitted || isAdvanced) && (
+                          <div className="pt-2 flex items-center justify-between">
+                            {(isAdvanced || round.isRoundCleared) ? (
+                              <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                                <CheckCircle2 size={14} className="text-emerald-600" />
+                                Round Cleared · Next Round Unlocked
+                              </span>
+                            ) : <span />}
+
                             <button
                               type="button"
                               onClick={() => openSubmissionModal(round)}
@@ -529,6 +619,28 @@ const Participate = () => {
                   })}
                 </div>
               </div>
+
+              {/* Invite Friends (leader only) */}
+              {data?.isLeader && data?.team?.inviteCode && (
+                <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-100/80 space-y-2">
+                  <p className="text-[10px] font-bold text-indigo-900 flex items-center gap-1">
+                    <UserPlus size={12} /> Invite Teammates
+                  </p>
+                  <p className="text-[10px] text-indigo-700 font-alef leading-snug">
+                    Share your invite code with friends. They can join your team during hackathon registration.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`Join my team for ${data.hackathon?.eventName}! Use code: ${data.team.inviteCode}`);
+                      alert('Invite message copied to clipboard!');
+                    }}
+                    className="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Share2 size={12} /> Copy Invite Message
+                  </button>
+                </div>
+              )}
 
               {/* Leave / Disband Team */}
               <div className="pt-2 border-t border-gray-100">

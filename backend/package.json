@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@types/adm-zip": "^0.5.8",
     "@types/nodemailer": "^8.0.1",
+    "adm-zip": "^0.6.1",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.11.0",
     "cookie": "^2.0.1",

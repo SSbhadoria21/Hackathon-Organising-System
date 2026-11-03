@@ -89,11 +89,10 @@ export async function GET(
 
     const subByRound = new Map(submissions.map((s: any) => [s.roundId.toString(), s]));
 
-    // Fetch published results for this team
+    // Fetch results for this team
     const results = await Result.find({
       hackathonId: id,
       teamId: (team as any)._id,
-      published: true,
     }).lean();
 
     const resultByRound = new Map(results.map((r: any) => [r.roundId.toString(), r]));
@@ -105,11 +104,26 @@ export async function GET(
       const sub = subByRound.get(rId);
       const result = resultByRound.get(rId);
 
-      const now = new Date();
+      const isSubAdvanced = sub?.status === 'ADVANCED' || result?.advanced === true;
+      const isSubRejected = sub?.status === 'REJECTED' || (result && result.advanced === false);
+
+      // Check if team cleared previous round
+      let prevRoundCleared = false;
+      if (round.roundNumber > 1) {
+        const prevRound = rounds.find((r: any) => r.roundNumber === round.roundNumber - 1);
+        if (prevRound) {
+          const prevSub = subByRound.get(prevRound._id.toString());
+          const prevRes = resultByRound.get(prevRound._id.toString());
+          prevRoundCleared = prevSub?.status === 'ADVANCED' || prevRes?.advanced === true;
+        }
+      }
+
       const isEligible =
         round.roundNumber === 1 ||
-        (round.teamIds || []).some((t: any) => t.toString() === (team as any)._id.toString());
+        (round.teamIds || []).some((t: any) => t.toString() === (team as any)._id.toString()) ||
+        prevRoundCleared;
 
+      const now = new Date();
       const roundStatus =
         now < round.roundOpens
           ? 'UPCOMING'
@@ -124,13 +138,15 @@ export async function GET(
           : null;
 
       let participantStatus: string;
-      if (!isEligible) {
+      if (isSubAdvanced) {
+        participantStatus = 'ADVANCED';
+      } else if (isSubRejected) {
+        participantStatus = 'ELIMINATED';
+        eliminated = true;
+      } else if (!isEligible) {
         participantStatus = eliminated ? 'ELIMINATED' : 'NOT_YET_ELIGIBLE';
-      } else if (result) {
-        participantStatus = result.advanced ? 'ADVANCED' : 'ELIMINATED';
-        if (!result.advanced) eliminated = true;
       } else if (sub) {
-        participantStatus = 'SUBMITTED';
+        participantStatus = sub.status === 'EVALUATING' ? 'EVALUATING' : 'SUBMITTED';
       } else if (roundStatus === 'ACTIVE') {
         participantStatus = 'PENDING_SUBMISSION';
       } else if (roundStatus === 'CLOSED') {
@@ -152,6 +168,11 @@ export async function GET(
         criterias: round.criterias || [],
         isEligible,
         participantStatus,
+        isRoundCleared: isSubAdvanced,
+        isOnline: round.isOnline !== false,
+        offlineVenue: round.offlineVenue,
+        offlineAddress: round.offlineAddress,
+        offlineMapLink: round.offlineMapLink,
         submission: sub
           ? {
               _id: sub._id,

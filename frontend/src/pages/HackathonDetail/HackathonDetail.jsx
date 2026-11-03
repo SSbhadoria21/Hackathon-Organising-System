@@ -461,7 +461,7 @@ const HackathonDetail = () => {
                     </>
                   ) : (
                     <>
-                      Register for Free <ChevronRight size={14} />
+                      {h.paid ? `Register (${formatCurrency(h.feeAmount)})` : 'Register for Free'} <ChevronRight size={14} />
                     </>
                   )}
                 </button>
@@ -548,10 +548,10 @@ const HackathonDetail = () => {
                         </div>
                       </div>
                       <a
-                        href={h.problemStatementPdfUrl}
+                        href={`http://localhost:3000/api/hackathons/${id}/pdf`}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3.5 py-1.5 rounded-xl bg-darker-blue text-white text-xs font-semibold hover:bg-dark-blue flex items-center gap-1"
+                        className="px-3.5 py-1.5 rounded-xl bg-darker-blue text-white text-xs font-semibold hover:bg-dark-blue flex items-center gap-1 cursor-pointer"
                       >
                         Download PDF <ExternalLink size={12} />
                       </a>
@@ -918,7 +918,7 @@ const HackathonDetail = () => {
                   </>
                 ) : (
                   <>
-                    Register for Free <ChevronRight size={16} />
+                    {h.paid ? `Register (${formatCurrency(h.feeAmount)})` : 'Register for Free'} <ChevronRight size={16} />
                   </>
                 )}
               </button>
@@ -926,6 +926,8 @@ const HackathonDetail = () => {
               <p className="text-[11px] text-center text-gray-500 font-alef mb-5">
                 {isRegistered
                   ? 'Your participation is confirmed. Prepare your repositories for Round 1!'
+                  : h.paid
+                  ? `Registration Fee: ${formatCurrency(h.feeAmount)} • Form a team or join with an invite code`
                   : 'Free entry • Form a team or join with an invite code'}
               </p>
 

@@ -18,6 +18,7 @@ const LandingNavbar = () => {
   const [unreadCount, setUnreadCount] = useState(0)
   const [recentNotifications, setRecentNotifications] = useState([])
   const notifRef = useRef(null)
+  const activityRef = useRef(null)
 
   const userData = useSelector((state) => state.auth.userData?.data)
   const loginStatus = useSelector((state)=>state.auth.status)
@@ -68,6 +69,22 @@ const LandingNavbar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [notificationOpen]);
+
+  // Close activity menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (activityRef.current && !activityRef.current.contains(event.target)) {
+        setActivityOpen(false);
+      }
+    };
+
+    if (activityOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [activityOpen]);
 
   const handleQuickRespond = async (e, notifId, action) => {
     e.stopPropagation();
@@ -180,34 +197,59 @@ const LandingNavbar = () => {
 
 
             {/* my activities: */}
-            <div className='bg-white w-7 h-7 rounded-full flex justify-center items-center relative group mt-4 cursor-pointer' onClick={() => setActivityOpen(!activityOpen)}>
+            <div
+              ref={activityRef}
+              className='bg-white w-7 h-7 rounded-full flex justify-center items-center relative group mt-4 cursor-pointer'
+              onClick={() => setActivityOpen(!activityOpen)}
+            >
               <Pencil size={18} className="text-icon-gray group-hover:text-darker-blue transition-colors duration-200" />
 
-              <div className="absolute top-full left-1/2 -translate-x-1 mt-1.5 hidden group-hover:block whitespace-nowrap bg-light-green text-dark-green text-[10px] px-2 py-1 rounded-full shadow-md shadow-black/15 z-50 font-alef">
-                My Activities
-              </div>
+              {!activityOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1 mt-1.5 hidden group-hover:block whitespace-nowrap bg-light-green text-dark-green text-[10px] px-2 py-1 rounded-full shadow-md shadow-black/15 z-50 font-alef pointer-events-none">
+                  My Activities
+                </div>
+              )}
 
               {activityOpen && (
-                <div className="absolute left-5 ml-3 top-0 bg-white rounded-2xl shadow-lg p-2 w-45 text-[12px] font-alef text-darker-blue">
-                  <h1 className='text-[13px] font-bold'>My Activities</h1>
-                  <button className="flex gap-1 w-full text-left px-3 py-1 hover:bg-gray-100 rounded-full" onClick={() => navigate("/")}>
+                <div
+                  className="absolute left-6 ml-3 top-0 bg-white rounded-2xl shadow-xl border border-gray-100 p-2.5 w-48 text-[12px] font-alef text-darker-blue z-50 animate-in fade-in zoom-in-95 duration-150"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h1 className='text-[13px] font-bold px-2 py-1 text-darker-blue'>My Activities</h1>
+                  <button
+                    className="flex items-center gap-2 w-full text-left px-3 py-1.5 hover:bg-gray-100 rounded-xl cursor-pointer transition font-medium"
+                    onClick={() => {
+                      navigate("/activities?tab=participations");
+                      setActivityOpen(false);
+                    }}
+                  >
                     <Goal size={15} color="#9d9d9d" />
                     Participations
                   </button>
 
-                  <button className="flex gap-1 w-full text-left px-3 py-1 hover:bg-gray-100 rounded-full" onClick={() => navigate("/")}>
+                  <button
+                    className="flex items-center gap-2 w-full text-left px-3 py-1.5 hover:bg-gray-100 rounded-xl cursor-pointer transition font-medium"
+                    onClick={() => {
+                      navigate("/activities?tab=created");
+                      setActivityOpen(false);
+                    }}
+                  >
                     <RadioTower size={15} color="#9d9d9d" />
                     Created Hackathons
                   </button>
 
-                  <button className="flex gap-1 w-full text-left px-3 py-1 hover:bg-gray-100 rounded-full" onClick={() => navigate("/")}>
+                  <button
+                    className="flex items-center gap-2 w-full text-left px-3 py-1.5 hover:bg-gray-100 rounded-xl cursor-pointer transition font-medium"
+                    onClick={() => {
+                      navigate("/activities?tab=accessed");
+                      setActivityOpen(false);
+                    }}
+                  >
                     <UserStar size={15} color="#9d9d9d" />
                     Accessed Hackathons
                   </button>
                 </div>
               )}
-
-
             </div>
 
 

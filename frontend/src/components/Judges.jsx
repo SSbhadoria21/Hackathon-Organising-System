@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { UserCheck, Trash2, Mail, AtSign, Shield, CheckCircle } from "lucide-react";
+import React, { useEffect, useState, useRef } from "react";
+import { UserCheck, Trash2, Mail, AtSign, Shield, CheckCircle, Search, Loader2 } from "lucide-react";
 import hackathonService from "../backend/hackathon.js";
+import authService from "../backend/auth.js";
 
 const unwrap = (response) => {
   let result = response;
@@ -26,6 +27,12 @@ const Judges = ({
   const [inviteMode, setInviteMode] = useState("username"); // 'username' | 'email'
 
   const [username, setUsername] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const suggestionBoxRef = useRef(null);
+
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [accessType, setAccessType] = useState("FULL"); // 'FULL' | 'SPECIFIC_ROUNDS'
@@ -67,6 +74,83 @@ const Judges = ({
       cancelled = true;
     };
   }, [draftId]);
+
+  // Debounced search for platform usernames
+  useEffect(() => {
+    if (inviteMode !== "username") {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const clean = username.trim().replace(/^@/, '');
+    if (!clean) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setLoadingSuggestions(false);
+      return;
+    }
+
+    setLoadingSuggestions(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await authService.searchUsers(clean);
+        const data = unwrap(res);
+        if (Array.isArray(data)) {
+          setSuggestions(data);
+          setShowSuggestions(true);
+          setHighlightedIndex(-1);
+        }
+      } catch (err) {
+        console.error("Search user error:", err);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [username, inviteMode]);
+
+  // Click outside to close suggestion popup
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        suggestionBoxRef.current &&
+        !suggestionBoxRef.current.contains(event.target)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectUser = (user) => {
+    setUsername(user.username);
+    if (user.fullName && !fullName) {
+      setFullName(user.fullName);
+    }
+    setShowSuggestions(false);
+    setSuggestions([]);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1));
+    } else if (e.key === "Enter" && highlightedIndex >= 0) {
+      e.preventDefault();
+      handleSelectUser(suggestions[highlightedIndex]);
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+    }
+  };
 
   const toggleRoundSelection = (rId) => {
     setSelectedRoundIds((prev) =>
@@ -227,23 +311,107 @@ const Judges = ({
 
         <form onSubmit={handleInvite} className="space-y-4">
           {inviteMode === "username" ? (
-            <div>
+            <div className="relative" ref={suggestionBoxRef}>
               <label className="block text-xs font-medium text-gray-700 mb-1">
                 Platform Username <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">@</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">@</span>
                 <input
                   type="text"
-                  placeholder="e.g. john_doe"
+                  placeholder="Type an alphabet (e.g. rishika)"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className={`${inputClass} bg-white text-sm pl-8`}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (!showSuggestions) setShowSuggestions(true);
+                  }}
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowSuggestions(true);
+                  }}
+                  onKeyDown={handleKeyDown}
+                  className={`${inputClass} bg-white text-sm pl-8 pr-9`}
                   required
+                  autoComplete="off"
                 />
+                {loadingSuggestions ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <Loader2 size={15} className="animate-spin text-darker-blue" />
+                  </div>
+                ) : (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                    <Search size={14} />
+                  </div>
+                )}
               </div>
+
+              {/* Suggestions Dropdown */}
+              {showSuggestions && username.trim().replace(/^@/, '').length > 0 && (
+                <div className="absolute left-0 right-0 mt-1.5 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden max-h-60 overflow-y-auto animate-in fade-in duration-150">
+                  {loadingSuggestions && suggestions.length === 0 ? (
+                    <div className="p-3 text-xs text-gray-500 flex items-center justify-center gap-2">
+                      <Loader2 size={13} className="animate-spin" /> Searching users...
+                    </div>
+                  ) : suggestions.length > 0 ? (
+                    <div>
+                      <div className="px-3 py-1.5 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        Suggested Users ({suggestions.length})
+                      </div>
+                      <ul className="divide-y divide-gray-100">
+                        {suggestions.map((user, idx) => {
+                          const isHighlighted = idx === highlightedIndex;
+                          return (
+                            <li
+                              key={user._id || user.username}
+                              onClick={() => handleSelectUser(user)}
+                              onMouseEnter={() => setHighlightedIndex(idx)}
+                              className={`p-2.5 flex items-center gap-3 cursor-pointer transition-colors ${
+                                isHighlighted ? 'bg-indigo-50/80 text-darker-blue' : 'hover:bg-gray-50'
+                              }`}
+                            >
+                              {user.avatar ? (
+                                <img
+                                  src={user.avatar}
+                                  alt={user.username}
+                                  className="w-8 h-8 rounded-full object-cover border border-gray-200 shrink-0"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                  {(user.username || user.fullName || '?').charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0 text-left">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs font-bold text-gray-900 truncate">
+                                    {user.fullName || user.username}
+                                  </span>
+                                  <span className="text-[11px] font-semibold text-indigo-600 shrink-0">
+                                    @{user.username}
+                                  </span>
+                                </div>
+                                {user.collegeOrCompany && (
+                                  <p className="text-[10px] text-gray-500 truncate">
+                                    {user.collegeOrCompany}
+                                  </p>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-gray-400 px-2 py-0.5 rounded-md bg-gray-100">
+                                Select
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className="p-3 text-xs text-gray-500 text-center">
+                      No matching user found for &ldquo;{username.trim()}&rdquo;
+                    </div>
+                  )}
+                </div>
+              )}
+
               <p className="mt-1 text-xs text-gray-500">
-                User will receive an instant in-app invitation notification.
+                Type an alphabet or username to see instant suggestions.
               </p>
             </div>
           ) : (

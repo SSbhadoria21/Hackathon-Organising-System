@@ -1,5 +1,9 @@
 import { NextRequest } from 'next/server';
-import { GET as getManagement, PATCH as patchManagement } from '@/app/api/hackathons/[id]/management/route';
+import {
+  GET as getManagement,
+  PATCH as patchManagement,
+  DELETE as deleteManagement,
+} from '@/app/api/hackathons/[id]/management/route';
 
 export async function GET(
   req: NextRequest,
@@ -13,4 +17,11 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   return patchManagement(req, context);
+}
+
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  return deleteManagement(req, context);
 }

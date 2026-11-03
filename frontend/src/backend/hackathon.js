@@ -114,6 +114,66 @@ class HackathonService {
     const { data } = await api.get(`/hackathons/${id}/results`);
     return data;
   }
+
+  async getActivitiesOverview() {
+    const { data } = await api.get("/activities");
+    return data;
+  }
+
+  async getCreatedHackathons(params = {}) {
+    const { data } = await api.get("/activities/created-hackathons", { params });
+    return data;
+  }
+
+  async getParticipations(params = {}) {
+    const { data } = await api.get("/activities/participations", { params });
+    return data;
+  }
+
+  async getAccessedHackathons(params = {}) {
+    const { data } = await api.get("/activities/accessed-hackathons", { params });
+    return data;
+  }
+
+  async completePayment(hackathonId) {
+    const { data } = await api.post(`/hackathons/${hackathonId}/payment/complete`);
+    return data;
+  }
+
+  async getManageTeams(hackathonId) {
+    const { data } = await api.get(`/hackathons/${hackathonId}/manage/teams`);
+    return data;
+  }
+
+  async getManageSubmissions(hackathonId) {
+    const { data } = await api.get(`/hackathons/${hackathonId}/submissions/all`);
+    return data;
+  }
+
+  async deleteHackathon(hackathonId) {
+    const { data } = await api.delete(`/hackathons/${hackathonId}`);
+    return data;
+  }
+
+  async getManagementData(hackathonId) {
+    const { data } = await api.get(`/hackathons/${hackathonId}/management`);
+    return data;
+  }
+
+  async submitJudgeScore(hackathonId, payload) {
+    const { data } = await api.post(`/hackathons/${hackathonId}/judge/score`, payload);
+    return data;
+  }
+
+  async advanceRound(hackathonId, roundId, payload) {
+    const { data } = await api.post(`/hackathons/${hackathonId}/rounds/${roundId}/advance`, payload);
+    return data;
+  }
+
+  async getJudgeSubmissions(hackathonId, params = {}) {
+    const { data } = await api.get(`/hackathons/${hackathonId}/judge/submissions`, { params });
+    return data;
+  }
 }
 
 const hackathonService = new HackathonService();
